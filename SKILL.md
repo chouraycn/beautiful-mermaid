@@ -139,9 +139,10 @@ bun add beautiful-mermaid
 提供可视化的样式定制界面，**AI 必须用 `preview_url` 工具直接以文件路径打开**（在 IDE 内置浏览器中显示，无需服务器）：
 
 ```javascript
-// 第1步：用 search_file 工具查找 beautiful-mermaid 的 SKILL.md（glob 低风险）
-// 结果示例：["beautiful-mermaid/SKILL.md", ...]
-// 取第一个结果的父目录作为 SKILL_DIR
+// 第1步：用 execute_command 执行 find 命令查找 beautiful-mermaid 的 SKILL.md
+// find ~/.workbuddy/skills -name "SKILL.md" -exec grep -l "name: beautiful-mermaid" {} \;
+// 结果示例：/Users/chouray/.workbuddy/skills/beautiful-mermaid/SKILL.md
+// 取其父目录作为 SKILL_DIR
 
 // 第2步：读取 .workbuddy/last-render.json（如果有）
 // 第3步：用实际路径打开（传递 theme/preset 参数以便继承上次样式）
@@ -150,7 +151,7 @@ const themeParam = lastRender ? `?theme=${lastRender.theme}&preset=${lastRender.
 preview_url("file://" + SKILL_DIR + "/assets/preview.html" + themeParam)
 ```
 
-> ⚠️ **重要**：skill 安装目录名 = zip 文件名（不含 .zip），**不一定**是 `beautiful-mermaid`。若用户将 zip 改名，安装目录也会变。**每次使用前必须用 `search_file` 工具动态检测实际目录名**，不得硬编码。
+> ⚠️ **重要**：skill 安装目录名 = zip 文件名（不含 .zip），**不一定**是 `beautiful-mermaid`。若用户将 zip 改名，安装目录也会变。**每次使用前必须用 `execute_command` 的 find 命令动态检测实际目录名**，不得硬编码。
 
 ❌ 禁止使用 `open`/`start` 命令或启动任何 HTTP 服务器。
 
