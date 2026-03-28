@@ -1,7 +1,11 @@
 ---
 name: beautiful-mermaid
+version: 1.0.0
+description: "Render Mermaid diagrams as beautiful SVG, PNG, or ASCII art. Supports 6 chart types (flowchart, sequence, state, class, ER, XY chart), 16 built-in themes, 5 style presets, CSS-level customization, interactive preview, and batch rendering. Works in terminal, chat, or web environments."
+description_zh: "Mermaid 图表美化渲染工具，支持流程图/序列图/状态图/类图/ER图/XY图表6种类型，16主题5预设，可导出SVG/PNG/ASCII"
+description_en: "Beautiful Mermaid diagram renderer (SVG/PNG/ASCII, 16 themes, 5 presets, interactive preview)"
+homepage: https://github.com/chouraycn/beautiful-mermaid
 icon: beautiful-mermaid.png
-description: 将 Mermaid 图表渲染为美观的 SVG、PNG 或 ASCII 艺术字。支持流程图、序列图、状态图、类图、ER图、XY图表等6种图表类型，提供15+内置主题和自定义主题能力，支持CSS级样式定制和交互式预览。适用于在终端、聊天界面或网页中可视化数据流、系统架构、状态机等。触发词：mermaid图表、渲染mermaid、流程图、序列图、状态图、类图、ER图、ASCII图表、SVG图表、PNG图表、导出mermaid、样式定制、自定义样式、xychart、柱状图、折线图、数据图表、架构图、系统架构图、时序图、关系图、生成图表、图形化、可视化、画图、绘图、绘制图表、依赖关系图、流程设计、数据可视化、画流程图、画架构图
 ---
 
 # Beautiful Mermaid Skill
@@ -95,7 +99,7 @@ orange-light  + modern    → 暖色系浅色主题（橙色现代感）
 >
 > **打开方式**（唯一合法方式）：
 > - 工具：`preview_url`
-> - URL：`file:///Users/chouray/Desktop/beautiful-mermaid/beautiful-mermaid/assets/preview.html`
+> - URL：`file://{__SKILL_DIR__}/assets/preview.html`（`__SKILL_DIR__` 为技能安装目录的绝对路径）
 >
 > **唯一例外**：用户明确说"直接渲染，不用预览"或"跳过预览"时，才可跳过 preview 步骤。
 >
@@ -128,7 +132,7 @@ bun add beautiful-mermaid
 提供可视化的样式定制界面，**AI 必须用 `preview_url` 工具直接以文件路径打开**（在 IDE 内置浏览器中显示，无需服务器）：
 
 ```
-preview_url("file:///Users/chouray/Desktop/beautiful-mermaid/beautiful-mermaid/assets/preview.html")
+preview_url(`file://{__SKILL_DIR__}/assets/preview.html`)
 ```
 
 ❌ 禁止使用 `open`/`start` 命令或启动任何 HTTP 服务器。
@@ -585,7 +589,7 @@ const richTheme = {
 
 **Step 1 — 在 Playground 中确认风格（强制）**
 
-AI 直接用 `preview_url` 工具打开 `file:///Users/chouray/Desktop/beautiful-mermaid/beautiful-mermaid/assets/preview.html`（无需服务器，见上方"AI 预览工作规则"）。用户在页面中选择主题和预设后，底部会实时显示 CLI 命令栏：
+AI 直接用 `preview_url` 工具打开 `file://{__SKILL_DIR__}/assets/preview.html`（无需服务器，见上方"AI 预览工作规则"）。用户在页面中选择主题和预设后，底部会实时显示 CLI 命令栏：
 
 ```
 node scripts/render.js input.mmd -t dracula -p gradient -o output-dracula-gradient.svg
@@ -1067,9 +1071,8 @@ xychart-beta
 ## 代码级样式预设
 
 ```javascript
-// 导入样式预设模块
-const { STYLE_PRESETS, generateCSSStyles, injectStylesToSVG } = require('./scripts/styles.js');
-
+// 导入样式预设模块（ESM）
+import { STYLE_PRESETS, generateCSSStyles, injectStylesToSVG } from './scripts/styles.js';
 import { renderMermaidSVG } from 'beautiful-mermaid';
 
 // 1. 渲染基础 SVG

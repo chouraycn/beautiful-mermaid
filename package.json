@@ -32,8 +32,8 @@
   ],
   "license": "MIT",
   "author": {
-    "name": "CodeBuddy",
-    "url": "https://codebuddy.ai"
+    "name": "chouray",
+    "url": "https://github.com/chouraycn"
   },
   "engines": {
     "node": ">=16.0.0"
