@@ -132,7 +132,7 @@ orange-light  + modern    → 暖色系浅色主题（橙色现代感）
 > ## 新任务的标准流程（必须全部执行）
 >
 > **Step 1 — 打开预览工具（第一优先级）**
-> - **立即执行**：`preview_url("assets/preview.html")`
+> - **立即执行**：`preview_url("file://" + 当前工作目录 + "assets/preview.html")`
 > - 不要问用户任何问题，先打开 preview.html
 > - 等用户在预览界面选择主题和预设
 >
@@ -273,7 +273,8 @@ orange-light  + modern    → 暖色系浅色主题（橙色现代感）
 >
 > **打开方式**（唯一合法方式）：
 > - 工具：`preview_url`
-> - URL：`assets/preview.html`（直接用相对路径，或启动 HTTP 服务器后用 `http://localhost:xxx/assets/preview.html`）
+> - URL：`file://` + 当前工作目录绝对路径 + `assets/preview.html`
+> - **AI 自动转换规则**：SKILL.md 中写的是相对路径示例，AI 调用 `preview_url` 时必须自动替换为当前工作目录的绝对路径
 >
 > **唯一例外**：用户明确说"直接渲染，不用预览"或"跳过预览"时，才可跳过 preview 步骤。
 >
@@ -306,8 +307,10 @@ bun add beautiful-mermaid
 提供可视化的样式定制界面，**AI 必须用 `preview_url` 工具直接以文件路径打开**（在 IDE 内置浏览器中显示，无需服务器）：
 
 ```
-preview_url("assets/preview.html")
+preview_url("file://" + 当前工作目录 + "assets/preview.html")
 ```
+
+**AI 自动转换规则**：将相对路径 `assets/preview.html` 拼接为 `file://` + 工作目录绝对路径。
 
 ❌ 禁止使用 `open`/`start` 命令或启动任何 HTTP 服务器。
 
@@ -764,7 +767,7 @@ const richTheme = {
 
 **Step 1 — 在 Playground 中确认风格（强制）**
 
-AI 直接用 `preview_url` 工具打开 `assets/preview.html`（无需服务器，见上方"AI 预览工作规则"）。用户在页面中选择主题和预设后，底部会实时显示 CLI 命令栏：
+AI 直接用 `preview_url` 工具打开 `file://` + 当前工作目录 + `assets/preview.html`（无需服务器，见上方"AI 预览工作规则"）。用户在页面中选择主题和预设后，底部会实时显示 CLI 命令栏：
 
 ```
 node scripts/render.js input.mmd -t dracula -p gradient -o output-dracula-gradient.svg
