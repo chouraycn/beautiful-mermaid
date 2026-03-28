@@ -1350,6 +1350,7 @@ window.__BM = __BM_TEMP;
     themeGrid.addEventListener('click', e => {
       const chip = e.target.closest('.theme-chip');
       if (!chip) return;
+      console.log('[Theme] Clicked:', chip.dataset.theme);
       document.querySelectorAll('.theme-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       currentTheme = chip.dataset.theme;
@@ -1363,6 +1364,7 @@ window.__BM = __BM_TEMP;
     presetGrid.addEventListener('click', e => {
       const card = e.target.closest('.preset-card');
       if (!card) return;
+      console.log('[Preset] Clicked:', card.dataset.preset);
       document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
       card.classList.add('active');
       currentPreset = card.dataset.preset;
@@ -1377,6 +1379,7 @@ window.__BM = __BM_TEMP;
     chartTypeGrid.addEventListener('click', e => {
       const chip = e.target.closest('.chart-type-chip');
       if (!chip) return;
+      console.log('[ChartType] Clicked:', chip.dataset.type);
       chartTypeGrid.querySelectorAll('.chart-type-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       currentChartType = chip.dataset.type;
@@ -1465,8 +1468,10 @@ window.__BM = __BM_TEMP;
     }
 
     function render() {
+      console.log('[Render] Called. Theme:', currentTheme, 'Preset:', currentPreset, 'ChartType:', currentChartType);
       if (!renderMermaidSVG) {
         previewFrame.innerHTML = '<span style="color:#ef4444;font-size:12px">渲染引擎加载失败，请刷新页面重试。</span>';
+        console.error('[Render] renderMermaidSVG is null!');
         return;
       }
 
