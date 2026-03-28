@@ -1,0 +1,30 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'SKILL.md'
+      - 'package.json'
+      - 'scripts/**'
+      - 'assets/**'
+
+jobs:
+  version-sync:
+    name: Check SKILL.md ↔ package.json version sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify versions are in sync
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          SKILL_VERSION=$(grep '^version:' SKILL.md | head -1 | sed 's/version: *//;s/"//g;s/ *$//')
+          echo "package.json version: $PKG_VERSION"
+          echo "SKILL.md version:     $SKILL_VERSION"
+          if [ "$PKG_VERSION" != "$SKILL_VERSION" ]; then
+            echo "::error::Version mismatch! package.json=$PKG_VERSION, SKILL.md=$SKILL_VERSION"
+            echo "::error::Please update both files to the same version before merging."
+            exit 1
+          fi
+          echo "✓ Versions are in sync: $PKG_VERSION"

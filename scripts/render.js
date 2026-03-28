@@ -195,8 +195,6 @@ Beautiful Mermaid CLI Renderer
   solarized-light     Solarized 亮色
   zinc-light          Zinc 亮色
   zinc-dark           Zinc 暗色
-  orange-dark         橙色暗调
-  orange-light        橙色亮调
 
 样式预设 (--preset):
   default     默认样式 (圆角8px, 边框2px, 阴影)
@@ -377,6 +375,15 @@ async function renderSingleFile(inputPath, outputPath, options, lib) {
 
 // 渲染核心逻辑（从代码字符串到输出）
 async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, renderMermaidASCII, THEMES }) {
+  // 剥离 .mmd 文件中的顶部 # 注释行（rich-html.js 的元数据注释）
+  // 格式: # @title / # @desc / # @icon / # @meta / # 普通注释
+  // Mermaid 语法本身不支持 # 注释，这些行必须在渲染前移除
+  code = code
+    .split('\n')
+    .filter(line => !line.trimStart().startsWith('#'))
+    .join('\n')
+    .trim();
+
   // 解析主题
   // 优先级: CLI --bg/--fg > JSON字符串 > 本地 LOCAL_THEMES 名称
   // 解析后通过 resolveTheme() 补全全部 7 个字段（bg/fg/line/accent/muted/surface/border）

@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Validate package structure
+        run: npm run check:pkg
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"                  # e.g. v1.2.0
+          VERSION="${TAG#v}"                        # e.g. 1.2.0
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          if [ "$VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag $TAG does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+          echo "Version check passed: $VERSION"
+
+      - name: Build skill zip
+        id: build
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="beautiful-mermaid-${VERSION}.zip"
+          # 打包：排除 node_modules, .git, .workbuddy, .DS_Store, *.log
+          zip -r "$ZIP_NAME" . \
+            --exclude "node_modules/*" \
+            --exclude ".git/*" \
+            --exclude ".workbuddy/*" \
+            --exclude ".DS_Store" \
+            --exclude "*.log" \
+            --exclude ".github/*" \
+            --exclude ".tmp-test/*" \
+            --exclude "*.zip"
+          echo "zip_name=$ZIP_NAME" >> $GITHUB_OUTPUT
+          echo "zip_size=$(du -sh $ZIP_NAME | cut -f1)" >> $GITHUB_OUTPUT
+          unzip -l "$ZIP_NAME" | tail -5
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="${{ steps.build.outputs.zip_name }}"
+          ZIP_SIZE="${{ steps.build.outputs.zip_size }}"
+          THEME_COUNT=$(node -e "import('beautiful-mermaid').then(({THEMES}) => console.log(Object.keys(THEMES).length))" 2>/dev/null || echo "15")
+
+          cat > release_notes.md << EOF
+          ## Beautiful Mermaid Skill v${VERSION}
+
+          ### 安装方式
+
+          1. 下载 \`${ZIP_NAME}\`
+          2. 在 WorkBuddy 中进入设置 → Skills → 从本地安装
+          3. 选择下载的 zip 文件
+
+          ### 本版本包含
+
+          - **${THEME_COUNT} 内置主题**：tokyo-night、dracula、github-dark、nord 等
+          - **5 种样式预设**：default、modern、gradient、outline、glass
+          - **6 种图表类型**：流程图、序列图、状态图、类图、ER图、XY图表
+          - **3 种输出格式**：SVG、PNG、ASCII
+          - 交互式预览工具（assets/preview.html）
+          - 多图表聚合 HTML 生成（rich-html.js）
+
+          ### 包大小
+
+          | 文件 | 大小 |
+          |------|------|
+          | \`${ZIP_NAME}\` | ${ZIP_SIZE} |
+
+          ### 链接
+
+          - [上游项目 beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid)
+          - [Skill 文档](https://github.com/chouraycn/beautiful-mermaid/blob/main/SKILL.md)
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Beautiful Mermaid Skill v${{ steps.version.outputs.version }}"
+          body_path: release_notes.md
+          files: ${{ steps.build.outputs.zip_name }}
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}

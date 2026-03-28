@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run smoke test – SVG render (all examples)
+        run: npm test
+
+      - name: Verify package structure
+        run: npm run check:pkg
+
+  lint-skill:
+    name: Lint SKILL.md
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify SKILL.md has required frontmatter fields
+        run: |
+          node -e "
+          const fs = require('fs');
+          const content = fs.readFileSync('SKILL.md', 'utf-8');
+          const required = ['name:', 'version:', 'description:', 'description_zh:', 'description_en:'];
+          const missing = required.filter(f => !content.includes(f));
+          if (missing.length > 0) {
+            console.error('SKILL.md missing fields:', missing.join(', '));
+            process.exit(1);
+          }
+          console.log('SKILL.md frontmatter OK');
+          "
