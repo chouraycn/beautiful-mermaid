@@ -12,22 +12,18 @@
 
 **Step 1 — 打开预览工具（第一优先级）**
 
-首先通过以下命令找到 skill 实际安装目录（目录名取决于 zip 文件名，不一定是 `beautiful-mermaid`）：
+首先通过 `search_file` 工具找到 skill 实际安装目录（目录名取决于 zip 文件名，不一定是 `beautiful-mermaid`）：
 
-```bash
-# 第一步：列出用户级 skill 目录
-ls ~/.workbuddy/skills/
-
-# 第二步：找到包含 SKILL.md 且内含 name: beautiful-mermaid 的目录
-find ~/.workbuddy/skills -name "SKILL.md" -exec grep -l "name: beautiful-mermaid" {} \;
-# 若上面命令找到结果，取其父目录路径即为 SKILL_DIR
-
-# 若用户级不存在，检查项目级
-ls .workbuddy/skills/ 2>/dev/null
+```javascript
+// 使用 search_file 工具查找（glob 方式，低风险）
+// 搜索目标目录：/Users/<user>/.workbuddy/skills
+// 搜索模式："**/SKILL.md"
+// 返回结果示例：["beautiful-mermaid/SKILL.md", ...]
+// 取第一个结果的父目录路径即为 SKILL_DIR
 ```
 
 得到 `SKILL_DIR` 后，立即执行：
-```
+```javascript
 preview_url("file://" + SKILL_DIR + "/assets/preview.html")
 ```
 

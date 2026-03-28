@@ -210,7 +210,7 @@ Beautiful Mermaid CLI Renderer
   --batch          批量模式: 渲染目录下所有 .mmd 文件
   --help, -h       显示帮助
 
-可用主题:
+可用主题 (共17个):
   github-light        GitHub 亮色 (默认)
   tokyo-night          东京之夜
   tokyo-night-storm    东京之夜·暴风雨
@@ -226,6 +226,8 @@ Beautiful Mermaid CLI Renderer
   solarized-light     Solarized 亮色
   zinc-light          Zinc 亮色
   zinc-dark           Zinc 暗色
+  orange-dark         橙色暗色
+  orange-light        橙色亮色
 
 样式预设 (--preset):
   default     默认样式 (圆角8px, 边框2px, 阴影)

@@ -90,8 +90,16 @@ const ARROW_HEAD = {
 //   border   节点边框精确色
 //
 // 使用方式：THEMES['tokyo-night'] → { bg, fg, line, accent, muted, surface, border }
+//
+// ─────────────────────────────────────────────────────────────────────────────
+// 架构说明：
+// - UPSTREAM_THEMES：同步自上游 beautiful-mermaid 库的主题
+// - LOCAL_THEMES：本地扩展的主题（不会被上游更新覆盖）
+// - THEMES = 合并后的完整主题列表
+// ─────────────────────────────────────────────────────────────────────────────
 
-const THEMES = {
+// §3a 上游主题（来自 lukilabs/beautiful-mermaid 库）
+const UPSTREAM_THEMES = {
   // ── Zinc（极简黑白系） ──────────────────────────────────────────────────────
   'zinc-light': {
     bg:      '#FFFFFF',
@@ -242,7 +250,11 @@ const THEMES = {
     surface: '#2c313a',   // 比 bg 略亮
     border:  '#3e4451',   // 背景高亮行
   },
-  // 橙色系
+};
+
+// §3b 本地扩展主题（不会被上游更新覆盖）
+const LOCAL_THEMES = {
+  // ── Orange（暖橙色系） ──────────────────────────────────────────────────────
   'orange-dark': {
     bg:      '#1c1410',   // 深棕黑
     fg:      '#f5e6d3',   // 暖白
@@ -261,6 +273,12 @@ const THEMES = {
     surface: '#fff7ed',   // 浅橙面板背景
     border:  '#fed7aa',   // 浅橙边框 orange-200
   },
+};
+
+// §3c 合并上游 + 本地主题（上游更新时本地不丢失）
+const THEMES = {
+  ...UPSTREAM_THEMES,
+  ...LOCAL_THEMES,
 };
 
 /** 未指定主题时的默认颜色 */
@@ -285,7 +303,9 @@ const THEME_DEFAULTS = {
  *   - dark 主题 → glass（深色毛玻璃效果佳）或 modern
  *   - light 主题 → modern 或 outline
  */
-const THEME_META = {
+
+// §4a 上游主题元数据
+const UPSTREAM_THEME_META = {
   'zinc-light':          { dark: false, label: 'Zinc Light',         family: 'zinc',        recommendedPreset: 'outline'  },
   'zinc-dark':           { dark: true,  label: 'Zinc Dark',          family: 'zinc',        recommendedPreset: 'glass'    },
   'tokyo-night':         { dark: true,  label: 'Tokyo Night',        family: 'tokyo-night', recommendedPreset: 'glass'    },
@@ -301,8 +321,18 @@ const THEME_META = {
   'solarized-light':     { dark: false, label: 'Solarized Light',    family: 'solarized',   recommendedPreset: 'outline'  },
   'solarized-dark':      { dark: true,  label: 'Solarized Dark',     family: 'solarized',   recommendedPreset: 'modern'   },
   'one-dark':            { dark: true,  label: 'One Dark',           family: 'one-dark',    recommendedPreset: 'gradient' },
+};
+
+// §4b 本地扩展主题元数据
+const LOCAL_THEME_META = {
   'orange-dark':         { dark: true,  label: 'Orange Dark',        family: 'orange',      recommendedPreset: 'glass'    },
   'orange-light':        { dark: false, label: 'Orange Light',       family: 'orange',      recommendedPreset: 'modern'   },
+};
+
+// §4c 合并上游 + 本地主题元数据
+const THEME_META = {
+  ...UPSTREAM_THEME_META,
+  ...LOCAL_THEME_META,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
