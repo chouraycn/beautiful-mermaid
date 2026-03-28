@@ -146,9 +146,9 @@ preview_url("file://" + SKILL_DIR + "/assets/preview.html")
 
 **继续任务的标准流程**：
 
-**Step 1 — 读取现有文件**
+**Step 1 — 读取现有文件 + 上次渲染状态**
 - 读取用户指定的 .mmd 文件（如果用户没有指定，列出工作区的 .mmd 文件让用户选择）
-- 读取上一次渲染时使用的主题和预设（如果有）
+- **读取 `.workbuddy/last-render.json` 获取上次渲染时使用的主题和预设**（这是 AI 知道主题/预设的唯一方式）
 
 **Step 2 — 理解修改需求**
 - 询问或理解用户想要如何修改（如"增加节点"、"修改流程"、"简化步骤"等）
@@ -159,7 +159,8 @@ preview_url("file://" + SKILL_DIR + "/assets/preview.html")
 - 保留原有的元数据（@title、@desc 等）
 
 **Step 4 — 重新渲染**
-- 使用之前的主题和预设重新渲染
+- 使用 **last-render.json 中记录的 theme 和 preset** 重新渲染
+- 命令示例：`node scripts/render.js <input.mmd> -o <output.svg> -t <theme> -p <preset>`
 - 用 `preview_url` 打开结果
 
 ---

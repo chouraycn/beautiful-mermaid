@@ -58,6 +58,37 @@ async function loadSharp() {
   return _sharp;
 }
 
+// 保存渲染状态到 .workbuddy/last-render.json
+function saveRenderState(options, theme, effectivePreset, outputPath) {
+  try {
+    const state = {
+      theme: typeof options.theme === 'string' ? options.theme : JSON.stringify(options.theme),
+      preset: effectivePreset,
+      themeFull: theme,
+      output: outputPath,
+      input: options.input,
+      format: options.format,
+      timestamp: new Date().toISOString()
+    };
+    
+    const statePath = path.join('.workbuddy', 'last-render.json');
+    fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+  } catch (e) {
+    // 静默失败，不影响主流程
+  }
+}
+
+// 读取上次渲染状态
+function loadRenderState() {
+  try {
+    const statePath = path.join('.workbuddy', 'last-render.json');
+    if (fs.existsSync(statePath)) {
+      return JSON.parse(fs.readFileSync(statePath, 'utf-8'));
+    }
+  } catch (e) {}
+  return null;
+}
+
 // 解析命令行参数
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -424,6 +455,7 @@ async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, r
     if (outputPath) {
       fs.writeFileSync(outputPath, output);
       console.log(`✓ ASCII 已保存: ${outputPath}`);
+      saveRenderState(options, theme, effectivePreset, outputPath);
     } else {
       console.log(output);
     }
@@ -448,6 +480,7 @@ async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, r
     fs.writeFileSync(outputPath, pngBuffer);
     const presetInfo = effectivePreset ? `, preset:${effectivePreset}` : '';
     console.log(`✓ PNG 已保存: ${outputPath} (${outputWidth}px, scale:${scale}, dpi:${dpi}${presetInfo})`);
+    saveRenderState(options, theme, effectivePreset, outputPath);
   } else {
     const renderOptions = { ...theme, interactive: options.interactive };
     let output = renderMermaidSVG(code, renderOptions);
@@ -459,6 +492,7 @@ async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, r
     fs.writeFileSync(outputPath, output);
     const presetInfo = effectivePreset ? ` + preset:${effectivePreset}` : '';
     console.log(`✓ SVG 已保存: ${outputPath}${presetInfo}`);
+    saveRenderState(options, theme, effectivePreset, outputPath);
   }
 }
 

@@ -72,6 +72,26 @@ import {
 // 本地主题别名（保持代码兼容）
 const LOCAL_THEMES = THEMES;
 
+// 保存渲染状态到 .workbuddy/last-render.json
+function saveRenderState(options, resolvedTheme, effectivePreset) {
+  try {
+    const state = {
+      theme: options.theme,
+      preset: effectivePreset,
+      themeFull: resolvedTheme,
+      output: options.output,
+      input: options.diagrams || options.batch,
+      format: 'html',
+      timestamp: new Date().toISOString()
+    };
+    
+    const statePath = path.join('.workbuddy', 'last-render.json');
+    fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+  } catch (e) {
+    // 静默失败，不影响主流程
+  }
+}
+
 // ─── CLI 参数解析 ───────────────────────────────────────────────────────────
 
 function parseArgs() {
@@ -3146,6 +3166,9 @@ async function main() {
   }
 
   fs.writeFileSync(options.output, html, 'utf-8');
+
+  // 保存渲染状态
+  saveRenderState(options, resolvedTheme, effectivePreset);
 
   const absPath = path.resolve(options.output);
   console.log(`\n✓ Rich HTML 已生成: ${absPath}`);
