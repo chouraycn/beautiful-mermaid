@@ -527,6 +527,63 @@ ${root} .edgeLabel text {
 }`;
 }
 
+/**
+ * 清理 SVG 中的硬编码颜色属性，确保 CSS 变量能够正确生效。
+ * 问题：Mermaid 代码中的硬编码颜色（如 style A fill:#4F46E5 或 classDef primary fill:#e0f2fe）
+ * 会直接写入 SVG 的 fill/stroke 属性，覆盖 CSS 变量，导致节点不继承主题色。
+ *
+ * 解决方案：移除所有硬编码的颜色属性，让 CSS 变量和 !important 规则生效。
+ *
+ * @param {string} svgString - 原始 SVG 字符串
+ * @returns {string} 清理后的 SVG 字符串
+ */
+function cleanHardcodedColors(svgString) {
+  let cleaned = svgString;
+  
+  // 使用正则表达式一次性清理所有硬编码颜色属性
+  // 这些属性会直接写入 SVG 元素，覆盖 CSS 变量
+  
+  // 1. 清理 fill 属性（填充颜色）
+  cleaned = cleaned.replace(/fill="[^"]*"/g, '');
+  
+  // 2. 清理 stroke 属性（描边颜色）
+  cleaned = cleaned.replace(/stroke="[^"]*"/g, '');
+  
+  // 3. 清理 style 属性中的硬编码颜色
+  cleaned = cleaned.replace(/style="[^"]*"/g, (match) => {
+    // 移除 style 中的 fill 和 stroke 相关规则
+    const styleContent = match.slice(7, -1); // 移除 style=" 和结尾的 "
+    const cleanedStyle = styleContent
+      .split(';')
+      .filter(rule => {
+        const trimmed = rule.trim();
+        // 保留非颜色相关的样式规则
+        return !trimmed.startsWith('fill:') && 
+               !trimmed.startsWith('stroke:') &&
+               !trimmed.startsWith('fill-opacity:') &&
+               !trimmed.startsWith('stroke-opacity:') &&
+               !trimmed.startsWith('stroke-width:') &&
+               !trimmed.startsWith('stroke-dasharray:');
+      })
+      .join(';')
+      .replace(/;\s*;/g, ';')
+      .trim();
+    
+    // 如果清理后还有内容，保留 style 属性
+    if (cleanedStyle) {
+      return `style="${cleanedStyle}"`;
+    }
+    // 否则移除整个 style 属性
+    return '';
+  });
+  
+  // 4. 清理多余的空白字符
+  cleaned = cleaned.replace(/\s+/g, ' ');
+  cleaned = cleaned.replace(/>\s+</g, '><');
+  
+  return cleaned;
+}
+
 // 自增计数器，用于生成唯一 SVG id（每次进程内递增）
 let _svgIdCounter = 0;
 
@@ -657,7 +714,12 @@ function injectStylesToSVG(svgString, theme, preset = 'default', svgId = null) {
     fixed = fixed.replace(svgTagMatch[0], `<svg${newAttrs}>`);
   }
 
-  // ── Step 2：在 <svg> 开标签之后注入样式 ──
+  // ── Step 2：清理硬编码的颜色属性，确保 CSS 变量生效 ──
+  // 问题：Mermaid 代码中的硬编码颜色（如 style A fill:#4F46E5）会直接写入 SVG 的 fill 属性
+  // 覆盖 CSS 变量，导致节点不继承主题色。必须清理这些硬编码属性。
+  fixed = cleanHardcodedColors(fixed);
+
+  // ── Step 3：在 <svg> 开标签之后注入样式 ──
   const svgOpenEnd = fixed.indexOf('>');
   if (svgOpenEnd === -1) return fixed;
 
@@ -951,6 +1013,7 @@ export {
 
   // CSS / SVG 生成
   generateCSSStyles,
+  cleanHardcodedColors,
   injectStylesToSVG,
   applyStylesToSVG,
 };
