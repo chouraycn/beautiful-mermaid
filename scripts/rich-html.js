@@ -1371,21 +1371,23 @@ function buildDiagramCards(diagrams, colors, isLight) {
 
       <!-- SVG Render Area -->
       <div class="svg-render-area" data-idx="${i}"
-           role="button" tabindex="0"
-           aria-label="点击全屏查看 ${escHtml(meta.title)}">
+           aria-label="拖拽移动 · 滚轮缩放 ${escHtml(meta.title)}">
         <!-- SVG Controls -->
         <div class="svg-controls">
-          <button class="svg-control-btn" onclick="window.svgZoomIn(${i})" title="放大" aria-label="放大">
+          <button class="svg-control-btn" onclick="event.stopPropagation();window.svgZoomIn(${i})" title="放大" aria-label="放大">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
           </button>
-          <button class="svg-control-btn" onclick="window.svgZoomOut(${i})" title="缩小" aria-label="缩小">
+          <button class="svg-control-btn" onclick="event.stopPropagation();window.svgZoomOut(${i})" title="缩小" aria-label="缩小">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
           </button>
-          <button class="svg-control-btn" onclick="window.downloadSvg(${i})" title="下载 SVG" aria-label="下载 SVG">
+          <button class="svg-control-btn" onclick="event.stopPropagation();window.svgReset(${i})" title="恢复原始大小和位置" aria-label="恢复原始大小和位置">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          <button class="svg-control-btn" onclick="event.stopPropagation();window.downloadSvg(${i})" title="下载 SVG" aria-label="下载 SVG">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </button>
         </div>
-        <div class="svg-render-inner" id="svg-container-${i}" style="transition: transform 0.2s ease;">${svgOrFallback}</div>
+        <div class="svg-render-inner" id="svg-container-${i}">${svgOrFallback}</div>
       </div>
 
       ${flowSummaryHtml}
@@ -1922,24 +1924,25 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       opacity: 0.8;
     }
 
-    /* ─── SVG Controls (Zoom) ────────────────────── */
+    /* ─── SVG Controls (Zoom + Download) ─────────── */
     .svg-controls {
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: 10px;
+      right: 10px;
       display: flex;
-      gap: 6px;
-      z-index: 100;
-      opacity: 0.7;
-      transition: opacity 0.2s;
+      gap: 4px;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.18s;
+      pointer-events: none;
     }
-    .svg-render-area:hover .svg-controls { opacity: 1; }
-    .svg-controls button {
+    .svg-render-area:hover .svg-controls {
+      opacity: 1;
       pointer-events: auto;
     }
     .svg-control-btn {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1948,14 +1951,14 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       border-radius: 6px;
       cursor: pointer;
       color: ${colors.fg};
-      transition: all 0.15s;
+      transition: background 0.15s, border-color 0.15s;
     }
     .svg-control-btn:hover {
       background: ${colors.accent};
       border-color: ${colors.accent};
       color: #fff;
     }
-    .svg-control-btn svg { width: 16px; height: 16px; }
+    .svg-control-btn svg { width: 14px; height: 14px; pointer-events: none; }
 
     /* ─── Diagram Section ───────────────────────── */
     .diagram-section {
@@ -2640,9 +2643,12 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       font-size: 10px;
       line-height: 16px;
     }
-    /* SVG 区域点击全屏 */
+    /* SVG 区域：默认可拖拽，悬停显示提示 */
     .svg-render-area {
-      cursor: pointer;
+      cursor: grab;
+    }
+    .svg-render-area.dragging {
+      cursor: grabbing;
     }
     .svg-render-area:focus-visible {
       outline: 2px solid var(--accent);
@@ -3007,24 +3013,104 @@ window.closeFullscreen = function(e) {
   document.body.style.overflow = '';
 };
 
-// SVG 缩放控制
+// SVG 缩放 + 下载
 window.svgZoomState = window.svgZoomState || {};
+
 window.svgZoomIn = function(idx) {
   const container = document.getElementById('svg-container-' + idx);
   if (!container) return;
-  const current = window.svgZoomState[idx] || 1;
-  const next = Math.min(current + 0.25, 3);
-  window.svgZoomState[idx] = next;
-  container.style.transform = 'scale(' + next + ')';
+  const scale = Math.min((window.svgZoomState[idx] || 1) + 0.25, 4);
+  window.svgZoomState[idx] = scale;
+  _applySvgTransform(idx);
 };
 window.svgZoomOut = function(idx) {
   const container = document.getElementById('svg-container-' + idx);
   if (!container) return;
-  const current = window.svgZoomState[idx] || 1;
-  const next = Math.max(current - 0.25, 0.5);
-  window.svgZoomState[idx] = next;
-  container.style.transform = 'scale(' + next + ')';
+  const scale = Math.max((window.svgZoomState[idx] || 1) - 0.25, 0.25);
+  window.svgZoomState[idx] = scale;
+  _applySvgTransform(idx);
 };
+window.svgReset = function(idx) {
+  window.svgZoomState[idx] = 1;
+  window.svgPanState[idx]  = { x: 0, y: 0 };
+  _applySvgTransform(idx);
+};
+window.downloadSvg = function(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const svg = container.querySelector('svg');
+  if (!svg) return;
+  const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'diagram-' + idx + '.svg';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+function _applySvgTransform(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const scale = window.svgZoomState[idx] || 1;
+  const pan   = window.svgPanState[idx]  || { x: 0, y: 0 };
+  container.style.transformOrigin = '50% 50%';
+  container.style.transform = 'translate(' + (pan.x || 0) + 'px,' + (pan.y || 0) + 'px) scale(' + scale + ')';
+}
+
+// SVG 拖拽平移 + 点击全屏（阈值区分）
+// 拖拽距离 > 5px → 平移；否则 mouseup 触发全屏
+window.svgPanState = window.svgPanState || {};
+
+(function initSvgDrag() {
+  document.addEventListener('mousedown', function(e) {
+    if (e.button !== 0) return;
+    const area = e.target.closest('.svg-render-area');
+    if (!area) return;
+    const idx = parseInt(area.dataset.idx, 10);
+    if (isNaN(idx)) return;
+
+    const container = document.getElementById('svg-container-' + idx);
+    if (!container) return;
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const pan = window.svgPanState[idx] || { x: 0, y: 0 };
+    const baseX = pan.x || 0;
+    const baseY = pan.y || 0;
+    let moved = false;
+
+    area.classList.add('dragging');
+
+    function onMove(ev) {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      if (!moved && Math.sqrt(dx * dx + dy * dy) > 5) moved = true;
+      if (moved) {
+        // 边界限制：SVG 不能拖出 svg-render-area 区域
+        const scale = window.svgZoomState[idx] || 1;
+        const areaRect = area.getBoundingClientRect();
+        const svgEl = container.querySelector('svg');
+        const svgW = svgEl ? svgEl.getBoundingClientRect().width / scale * scale : areaRect.width;
+        const svgH = svgEl ? svgEl.getBoundingClientRect().height / scale * scale : areaRect.height;
+        // 可移动的最大偏移量 = (SVG 尺寸 * scale - 容器尺寸) / 2，最小为 0
+        const maxX = Math.max(0, (svgW * scale - areaRect.width) / 2 + areaRect.width * 0.1);
+        const maxY = Math.max(0, (svgH * scale - areaRect.height) / 2 + areaRect.height * 0.1);
+        const newX = Math.min(maxX, Math.max(-maxX, baseX + dx));
+        const newY = Math.min(maxY, Math.max(-maxY, baseY + dy));
+        window.svgPanState[idx] = { x: newX, y: newY };
+        _applySvgTransform(idx);
+      }
+    }
+    function onUp() {
+      area.classList.remove('dragging');
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    e.preventDefault();
+  });
+})();
 window.downloadSvg = function(idx) {
   const container = document.getElementById('svg-container-' + idx);
   if (!container) return;

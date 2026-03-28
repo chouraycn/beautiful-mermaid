@@ -42,9 +42,27 @@ triggers:
   - 画图
   - 绘图
   - 绘制图表
+  - 用户旅程图
+  - 产品流程图
+  - 业务流程图
+  - 客户流程
+  - 试妆流程
+  - 购买流程
+  - 领券流程
 ---
 
 # Beautiful Mermaid Skill
+
+## 安装说明
+
+**目录名要求**：skill 目录名必须为 `beautiful-mermaid`，不是 `beautiful-mermaid-main` 或其他名称。
+
+**如果目录名不对**，手动重命名：
+```bash
+mv ~/.workbuddy/skills/beautiful-mermaid-main ~/.workbuddy/skills/beautiful-mermaid
+# 或项目级
+mv 项目目录/.workbuddy/skills/beautiful-mermaid-main 项目目录/.workbuddy/skills/beautiful-mermaid
+```
 
 ## 概述
 

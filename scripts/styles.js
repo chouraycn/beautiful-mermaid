@@ -483,20 +483,34 @@ ${root} text {
   dominant-baseline: central;
   dy: ${TEXT_BASELINE_SHIFT};
 }
-/* 直接覆盖元素属性 */
-${root} rect[fill="var(--_node-fill)"],
-${root} circle[fill="var(--_node-fill)"],
-${root} ellipse[fill="var(--_node-fill)"],
-${root} polygon[fill="var(--_node-fill)"] {
+/* ── 节点形状：类选择器 + 通用元素选择器双保险，确保无论 cleanHardcodedColors 是否删除 fill 属性都能生效 ── */
+${root} .node rect,
+${root} .node circle,
+${root} .node ellipse,
+${root} .node polygon,
+${root} .node path,
+${root} rect,
+${root} circle,
+${root} ellipse {
   fill:         ${theme.bg}        !important;
   stroke:       ${borderColor}     !important;
   stroke-width: ${p.node.borderWidth}px !important;
-  rx:           ${p.node.borderRadius}px !important;
-  ry:           ${p.node.borderRadius}px !important;
   filter: drop-shadow(0 ${p.node.shadowBlur / 2}px ${p.node.shadowBlur}px ${p.node.shadowColor}) !important;
 }
+${root} .node rect {
+  rx: ${p.node.borderRadius}px !important;
+  ry: ${p.node.borderRadius}px !important;
+}
+/* 菱形/多边形节点 */
+${root} .node polygon {
+  fill:   ${theme.bg}     !important;
+  stroke: ${borderColor}  !important;
+  stroke-width: ${p.node.borderWidth}px !important;
+}
 /* 节点文字 */
-${root} g.node text {
+${root} g.node text,
+${root} .label text,
+${root} .nodeLabel {
   fill: ${theme.fg} !important;
 }
 /* 子图/cluster 标题 */
@@ -505,23 +519,39 @@ ${root} .cluster-label text {
   font-size:   ${FONT_SIZES.groupHeader}px !important;
   font-weight: ${FONT_WEIGHTS.groupHeader} !important;
 }
-/* 边/连线 */
-${root} .edge, ${root} .edgePath .path {
+/* cluster 容器 */
+${root} .cluster rect {
+  fill:   ${theme.accent ? theme.accent + '18' : theme.fg + '0a'} !important;
+  stroke: ${borderColor} !important;
+  stroke-width: 1px !important;
+  filter: none !important;
+}
+/* 边/连线：只选连线相关路径，不影响节点内部形状 */
+${root} .edge path,
+${root} .edgePath path,
+${root} .edgePath .path {
+  fill:         none          !important;
   stroke:       ${lineColor}  !important;
   stroke-width: ${p.line.width}px !important;
 }
-${root} path {
+/* 连线（line 元素） */
+${root} .edge line,
+${root} .flowchart-link {
   stroke:       ${lineColor}  !important;
   stroke-width: ${p.line.width}px !important;
 }
-/* 箭头 */
+/* 箭头：marker 内的多边形/路径专属 */
+${root} marker polygon,
+${root} marker path,
 ${root} .arrowhead polygon,
-${root} marker polygon {
+${root} .arrowhead path {
   stroke: ${lineColor} !important;
   fill:   ${lineColor} !important;
+  filter: none !important;
 }
 /* 边标签 */
-${root} .edgeLabel text {
+${root} .edgeLabel text,
+${root} .edgeLabel {
   fill:      ${theme.muted || theme.fg} !important;
   font-size: ${FONT_SIZES.edgeLabel}px  !important;
 }`;
@@ -539,48 +569,47 @@ ${root} .edgeLabel text {
  */
 function cleanHardcodedColors(svgString) {
   let cleaned = svgString;
-  
-  // 使用正则表达式一次性清理所有硬编码颜色属性
-  // 这些属性会直接写入 SVG 元素，覆盖 CSS 变量
-  
-  // 1. 清理 fill 属性（填充颜色）
-  cleaned = cleaned.replace(/fill="[^"]*"/g, '');
-  
-  // 2. 清理 stroke 属性（描边颜色）
-  cleaned = cleaned.replace(/stroke="[^"]*"/g, '');
-  
-  // 3. 清理 style 属性中的硬编码颜色
-  cleaned = cleaned.replace(/style="[^"]*"/g, (match) => {
-    // 移除 style 中的 fill 和 stroke 相关规则
-    const styleContent = match.slice(7, -1); // 移除 style=" 和结尾的 "
+
+  // 只清理 Mermaid 写入的硬编码颜色属性（具体颜色值），不动 fill="none" / fill="transparent" 等语义性属性
+  // 匹配目标：fill="#xxx"  fill="rgb(...)"  fill="hsl(...)"  fill="rgba(...)"  fill="hsla(...)"
+  const COLOR_PATTERN = /#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)|hsla?\([^)]*\)/;
+
+  // 1. 清理 fill 属性中的硬编码颜色
+  cleaned = cleaned.replace(/\bfill="([^"]*)"/g, (match, val) => {
+    if (COLOR_PATTERN.test(val)) return '';       // 有颜色值 → 删除整个属性
+    return match;                                  // none / transparent / url(#...) → 保留
+  });
+
+  // 2. 清理 stroke 属性中的硬编码颜色
+  cleaned = cleaned.replace(/\bstroke="([^"]*)"/g, (match, val) => {
+    if (COLOR_PATTERN.test(val)) return '';
+    return match;
+  });
+
+  // 3. 清理 style 属性中的颜色相关规则
+  cleaned = cleaned.replace(/\bstyle="([^"]*)"/g, (_, styleContent) => {
     const cleanedStyle = styleContent
       .split(';')
       .filter(rule => {
-        const trimmed = rule.trim();
-        // 保留非颜色相关的样式规则
-        return !trimmed.startsWith('fill:') && 
-               !trimmed.startsWith('stroke:') &&
-               !trimmed.startsWith('fill-opacity:') &&
-               !trimmed.startsWith('stroke-opacity:') &&
-               !trimmed.startsWith('stroke-width:') &&
-               !trimmed.startsWith('stroke-dasharray:');
+        const trimmed = rule.trim().toLowerCase();
+        if (!trimmed) return false;
+        // 移除包含颜色值的 fill/stroke 规则
+        if ((trimmed.startsWith('fill:') || trimmed.startsWith('stroke:')) &&
+            COLOR_PATTERN.test(trimmed)) return false;
+        if (trimmed.startsWith('fill-opacity:') ||
+            trimmed.startsWith('stroke-opacity:') ||
+            trimmed.startsWith('stroke-width:') ||
+            trimmed.startsWith('stroke-dasharray:')) return false;
+        return true;
       })
       .join(';')
-      .replace(/;\s*;/g, ';')
-      .trim();
-    
-    // 如果清理后还有内容，保留 style 属性
-    if (cleanedStyle) {
-      return `style="${cleanedStyle}"`;
-    }
-    // 否则移除整个 style 属性
-    return '';
+      .replace(/;{2,}/g, ';')
+      .trim()
+      .replace(/^;|;$/g, '');
+
+    return cleanedStyle ? `style="${cleanedStyle}"` : '';
   });
-  
-  // 4. 清理多余的空白字符
-  cleaned = cleaned.replace(/\s+/g, ' ');
-  cleaned = cleaned.replace(/>\s+</g, '><');
-  
+
   return cleaned;
 }
 
@@ -701,14 +730,13 @@ function injectStylesToSVG(svgString, theme, preset = 'default', svgId = null) {
       let existingStyle = styleMatch[1];
       // 去掉已存在的 --_xxx: 声明（防止重复）
       existingStyle = existingStyle.replace(/--_[a-z-]+:[^;]+;?/g, '');
-      // 补全 background: 颜色（如果还没设置）
-      if (!existingStyle.includes('background')) {
-        existingStyle += `;background:${theme.bg}`;
-      }
-      const newStyle = `${existingStyle};${extraVars}`.replace(/^;+/, '');
+      // 去掉已有的 background 声明（让 HTML 容器控制背景，SVG 本身透明）
+      existingStyle = existingStyle.replace(/background:[^;]+;?/g, '');
+      const newStyle = `${existingStyle};${extraVars}`.replace(/^;+/, '').replace(/;;+/g, ';');
       newAttrs = newAttrs.replace(styleMatch[0], `style="${newStyle}"`);
     } else {
-      newAttrs = newAttrs + ` style="background:${theme.bg};${extraVars}"`;
+      // 只注入 CSS 变量，不注入 background（SVG 透明，背景由容器控制）
+      newAttrs = newAttrs + ` style="${extraVars}"`;
     }
 
     fixed = fixed.replace(svgTagMatch[0], `<svg${newAttrs}>`);
