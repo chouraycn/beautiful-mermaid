@@ -21,6 +21,8 @@
 - author：chouray (github.com/chouraycn)
 - .gitignore 已创建（排除 node_modules/.DS_Store/.workbuddy/）
 - 已删除 .gitattributes、assets/examples/er-diagram.mmd
+- 已删除内嵌的旧版本 beautiful-mermaid bundle（避免版本冲突）
+- 项目依赖 beautiful-mermaid@1.1.3（最新版本）
 - 排除 node_modules 后发布包总大小约 1.9MB（无超过 10MB 的文件）
 
 ## 修复记录（2026-03-28）
@@ -39,3 +41,10 @@
 - 添加 `version: "1.1.3"`
 - 添加 `homepage`, `author`, `keywords`, `triggers`
 - 将触发词从 description 拆分到独立 `triggers` 数组
+
+### 问题 4：文档准确性修复 ✓ 已修复
+- 修复SKILL.md中主题数量不一致问题（描述中从15+改为17+）
+- 修正主题对照表，添加orange-dark和orange-light主题
+- 更新预览功能描述中的主题数量（从15改为17）
+- 修复render.js帮助信息中的主题列表（移除重复项，添加缺失主题）
+- 修复图表类型描述不一致问题（明确6种核心图表类型 vs XY图表细分类型）
