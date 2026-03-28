@@ -1,8 +1,31 @@
-# 示例 1: 基础流程图
+# @title 用户登录完整流程
+# @desc 从用户输入账号密码到完成登录的完整流程，含验证码、token 刷新
+# @icon 🔐
+# @meta 节点数:7个|分支:2个|关键:token存储
 graph TD
-    A[开始] --> B[处理]
-    B --> C{判断}
-    C -->|是| D[成功]
-    C -->|否| E[失败]
-    D --> F([结束])
-    E --> F
+    Start([开始]) --> Input[输入账号密码]
+    Input --> Validate{验证格式?}
+    Validate -->|失败| ShowError[显示错误提示]
+    ShowError --> Input
+    Validate -->|成功| CheckCode{验证码?}
+    CheckCode -->|需要| VerifyCode[校验验证码]
+    VerifyCode -->|失败| ShowCodeError[验证码错误]
+    ShowCodeError --> Input
+    VerifyCode -->|成功| Auth[调用认证服务]
+    CheckCode -->|不需要| Auth
+    Auth -->|失败| ShowAuthError[认证失败]
+    ShowAuthError --> Input
+    Auth -->|成功| GenerateToken[生成Token]
+    GenerateToken --> SaveToken[存储Token]
+    SaveToken --> Success([登录成功])
+
+    classDef start fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    classDef process fill:#f3f4f6,stroke:#6b7280,stroke-width:2px
+    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
+    classDef end fill:#dcfce7,stroke:#22c55e,stroke-width:2px
+    classDef error fill:#fee2e2,stroke:#ef4444,stroke-width:2px
+
+    class Start,End end
+    class Input,Validate,CheckCode,Auth,GenerateToken,SaveToken process
+    class ShowError,ShowCodeError,ShowAuthError error
+    class Decision,VerifyCode decision

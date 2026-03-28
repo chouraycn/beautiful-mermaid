@@ -11,6 +11,10 @@ const TYPE_LABEL = {
   'Class':     '类图',
   'ER':        'ER图',
   'XY Chart':  '图表',
+  'XY Bar':    '柱状图',
+  'XY Line':   '折线图',
+  'XY Combo':  '组合图',
+  'XY Horizontal': '横向柱图',
   'Gantt':     '甘特图',
   'Pie':       '饼图',
   'Timeline':  '时间轴',
@@ -220,7 +224,17 @@ function inferDiagramType(codeLines) {
   if (t.startsWith('statediagram'))                             return { type: 'State',     typeDetail: '有限状态机' };
   if (t.startsWith('classdiagram'))                             return { type: 'Class',     typeDetail: 'UML 类图' };
   if (t.startsWith('erdiagram'))                                return { type: 'ER',        typeDetail: '实体关系图' };
-  if (t.startsWith('xychart-beta') || t.startsWith('xychart')) return { type: 'XY Chart',  typeDetail: '柱/折线数据图' };
+  if (t.startsWith('xychart-beta') || t.startsWith('xychart')) {
+    // XY 图表子类型关键字可能在第一行或后续行（如 "bar", "line", "combo", "horizontal"）
+    // 检查前 10 行来找出子类型（顺序重要：combo/horizontal 优先）
+    const firstLines = codeLines.slice(0, 10).join(' ').toLowerCase();
+    if (/\bhorizontal\b/i.test(firstLines))       return { type: 'XY Horizontal', typeDetail: '横向柱状图' };
+    if (/\bcombo\b/i.test(firstLines))            return { type: 'XY Combo',   typeDetail: '组合图' };
+    if (/\bbar\b/i.test(firstLines) && /\bline\b/i.test(firstLines)) return { type: 'XY Combo',   typeDetail: '组合图' }; // 同时有 bar 和 line 视为 combo
+    if (/\bbar\b/i.test(firstLines))              return { type: 'XY Bar',     typeDetail: '柱状图' };
+    if (/\bline\b/i.test(firstLines))             return { type: 'XY Line',    typeDetail: '折线图' };
+    return { type: 'XY Chart',  typeDetail: '柱/折线数据图' };
+  }
   if (t.startsWith('gantt'))                                    return { type: 'Gantt',     typeDetail: '项目甘特图' };
   if (t.startsWith('pie'))                                      return { type: 'Pie',       typeDetail: '饼图' };
   if (t.startsWith('timeline'))                                 return { type: 'Timeline',  typeDetail: '时间线图' };
@@ -1306,7 +1320,8 @@ function buildDiagramCards(diagrams, colors, isLight) {
     // 图表类型 badge 颜色（基于类型稳定哈希）
     const typeBadgeColors = {
       'Flowchart': '#3b82f6', 'Sequence': '#8b5cf6', 'State': '#10b981',
-      'Class': '#f59e0b', 'ER': '#ef4444', 'XY Chart': '#06b6d4',
+      'Class': '#f59e0b', 'ER': '#ef4444', 
+      'XY Chart': '#06b6d4', 'XY Bar': '#06b6d4', 'XY Line': '#8b5cf6', 'XY Combo': '#10b981', 'XY Horizontal': '#f59e0b',
       'Gantt': '#84cc16', 'Pie': '#ec4899', 'Timeline': '#f97316',
       'Mindmap': '#6366f1',
     };

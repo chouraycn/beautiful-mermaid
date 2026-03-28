@@ -6,7 +6,25 @@
 
 ## 任务识别规则（强制执行）
 
-每次用户请求生成新的流程图/图表时，都是一个**全新的任务**，必须**完全按照以下流程执行**，不得跳过任何步骤。
+### 第0步：检测新建还是继续（每次都要执行）
+
+**检查是否有上次渲染记录**：
+- 读取 `.workbuddy/last-render.json` 文件
+- 如果文件存在且包含有效的 theme/preset，说明用户之前有渲染过
+
+**弹窗询问用户**：
+```
+您有以下选择：
+1. 继续完善 - 继承上次的主题和预设，继续优化
+2. 全新开始 - 创建全新的图表（上次的主题/预设会丢失）
+
+请选择：___
+```
+
+- **如果用户选择"继续完善"**：读取 last-render.json 中的 theme/preset，直接进入渲染步骤（跳过 Step 1 打开预览）
+- **如果用户选择"全新开始"**：执行下面的标准流程（Step 1 打开预览）
+
+---
 
 ### 新任务的标准流程（必须全部执行）
 
@@ -24,10 +42,15 @@
 
 得到 `SKILL_DIR` 后，立即执行：
 ```javascript
-preview_url("file://" + SKILL_DIR + "/assets/preview.html")
+// 优先从 last-render.json 读取上次的主题/预设，传递到 URL 参数
+// 这样 preview.html 会自动继承上次的样式（用户无需重新选择）
+const lastRender = readRenderState(); // 读取 .workbuddy/last-render.json
+const themeParam = lastRender ? `?theme=${lastRender.theme}&preset=${lastRender.preset}` : '';
+preview_url("file://" + SKILL_DIR + "/assets/preview.html" + themeParam)
 ```
 
 - **禁止**：硬编码 `beautiful-mermaid` 作为目录名
+- 如果有 last-render.json，URL 参数会自动传递上次的主题/预设（preview.html 会优先使用 URL 参数）
 - 不要问用户任何问题，先打开 preview.html
 - 等用户在预览界面选择主题和预设
 
@@ -66,7 +89,9 @@ preview_url("file://" + SKILL_DIR + "/assets/preview.html")
 
 2. **打开 preview.html**（使用 preview_url 工具）：
    ```
-   preview_url("file://" + SKILL_DIR + "/assets/preview.html")
+   const lastRender = readRenderState();
+   const themeParam = lastRender ? `?theme=${lastRender.theme}&preset=${lastRender.preset}` : '';
+   preview_url("file://" + SKILL_DIR + "/assets/preview.html" + themeParam)
    ```
 
 3. **【关键】暂停所有操作**
@@ -102,8 +127,13 @@ preview_url("file://" + SKILL_DIR + "/assets/preview.html")
 **确认后的执行流程**：
 - 用户选择"继续之前的任务" → 执行**继续任务流程**（读取现有文件 → 修改 → 渲染）
 - 用户选择"全新开始一个任务" → 执行**新任务流程**：
-  1. **找到 skill 实际目录**：`find ~/.workbuddy/skills -name "SKILL.md" -exec grep -l "name: beautiful-mermaid" {} \;`
-  2. **打开 preview.html**：`preview_url("file://" + SKILL_DIR + "/assets/preview.html")`（不得硬编码目录名）
+  1. **找到 skill 实际目录**：用 `search_file` 工具查找
+  2. **打开 preview.html**（传递 last-render.json 中的主题/预设）：
+     ```
+     const lastRender = readRenderState();
+     const themeParam = lastRender ? `?theme=${lastRender.theme}&preset=${lastRender.preset}` : '';
+     preview_url("file://" + SKILL_DIR + "/assets/preview.html" + themeParam)
+     ```
   3. **【关键】暂停所有操作，等待用户选择主题和预设**
   4. **【关键】只有用户明确告诉你选择完成后，才能继续下一步**
   5. 记录选择的主题和预设（如 `tokyo-night` + `glass`）——**此值贯穿后续所有渲染命令**
@@ -123,6 +153,26 @@ preview_url("file://" + SKILL_DIR + "/assets/preview.html")
 - 用户说"再做一种样式" → AI 问："请问你是想在之前基础上添加新样式，还是全新开始？"
 
 **原则**：宁可多问一次，也不要猜错继续导致用户不满。
+
+---
+
+## 暂不支持的图表类型处理规则
+
+当用户请求以下图表类型时，**必须明确告知用户暂不支持**，并提供替代方案：
+
+| 图表类型 | 用户可能的说辞 | 替代方案 |
+|---------|---------------|---------|
+| **Mindmap（思维导图）** | "思维导图"、"脑图"、"mind map" | 建议使用流程图 `graph TD` 替代，或使用 mermaid.live 导出后用本 skill 转换样式 |
+| **Pie Chart（饼图）** | "饼图"、"占比图"、"pie chart" | 建议使用 XY 柱状图替代 |
+| **Gantt（甘特图）** | "甘特图"、"项目进度" | 建议使用流程图 + 状态图组合 |
+| **Git Graph** | "Git 图"、"版本历史" | 暂无替代，建议使用 mermaid.live |
+| **User Journey** | "用户旅程"、"journey" | 暂无替代，建议使用流程图 |
+
+**处理流程**：
+1. 检测到用户请求上述图表类型
+2. **立即告知**："抱歉，当前版本的 beautiful-mermaid 暂不支持 [图表类型]。支持列表为：流程图、序列图、状态图、类图、ER图、XY图表"
+3. 提供替代方案（见上表）
+4. 询问用户是否接受替代方案，或等待上游支持后再次尝试
 
 **AI 常见错误（必须避免）**：
 - ❌ "让我看看你现有的图表" → **禁止**，新任务不读取现有文件

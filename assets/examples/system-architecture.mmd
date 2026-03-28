@@ -1,33 +1,81 @@
-# 示例 4: 系统架构图
+%% 复杂系统架构图
+%% 展示微服务架构、多层设计、数据库、缓存、消息队列等
 graph TB
-    subgraph Frontend[前端层]
+    subgraph Client["客户端层"]
+        direction LR
         Web[Web应用]
-        Mobile[移动端]
+        Mobile[移动App]
+        API[API调用]
     end
-    
-    subgraph Gateway[网关层]
-        Nginx[Nginx]
-        LB[负载均衡]
+
+    subgraph Gateway["网关层"]
+        direction LR
+        APIGW[API Gateway]
+        Auth[认证服务]
+        Rate[限流服务]
     end
-    
-    subgraph Backend[后端服务]
-        API1[API服务1]
-        API2[API服务2]
-        API3[API服务3]
+
+    subgraph Service["服务层"]
+        direction TB
+        subgraph Core["核心服务"]
+            User[用户服务]
+            Order[订单服务]
+            Product[商品服务]
+        end
+        subgraph Extend["扩展服务"]
+            Pay[支付服务]
+            Notify[通知服务]
+            Search[搜索服务]
+        end
     end
-    
-    subgraph Data[数据层]
-        Redis[(Redis缓存)]
-        MySQL[(MySQL)]
-        MongoDB[(MongoDB)]
+
+    subgraph Data["数据层"]
+        direction LR
+        subgraph DB["关系型数据库"]
+            MySQL[(MySQL)]
+            PG[(PostgreSQL)]
+        end
+        subgraph Cache["缓存"]
+            Redis[(Redis)]
+            Mem[内存缓存]
+        end
+        subgraph MQ["消息队列"]
+            Kafka[Kafka]
+            Rabbit[RabbitMQ]
+        end
     end
-    
-    Web --> Nginx
-    Mobile --> Nginx
-    Nginx --> LB
-    LB --> API1
-    LB --> API2
-    LB --> API3
-    API1 --> Redis
-    API2 --> MySQL
-    API3 --> MongoDB
+
+    %% 连接关系
+    Web --> APIGW
+    Mobile --> APIGW
+    API --> APIGW
+
+    APIGW --> Auth
+    APIGW --> Rate
+    Auth --> User
+    Rate --> User
+
+    Core --> Extend
+    User --> MySQL
+    User --> Redis
+    Order --> MySQL
+    Order --> Redis
+    Product --> PG
+    Product --> Redis
+    Product --> Search
+
+    Pay --> MySQL
+    Notify --> Kafka
+    Search --> Elastic[(Elasticsearch)]
+
+    %% 样式定义
+    classDef primary fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    classDef secondary fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef database fill:#fff7ed,stroke:#ea580c,stroke-width:2px
+    classDef cache fill:#faf5ff,stroke:#9333ea,stroke-width:2px
+
+    class Web,Mobile,API primary
+    class APIGW,Auth,Rate secondary
+    class User,Order,Product,Pay,Notify,Search secondary
+    class MySQL,PG,Elastic database
+    class Redis,Mem,Kafka,Rabbit cache
