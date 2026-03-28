@@ -137,7 +137,7 @@ orange-light  + modern    → 暖色系浅色主题（橙色现代感）
 >
 > **打开方式**（唯一合法方式）：
 > - 工具：`preview_url`
-> - URL：`file:///Users/chouray/Desktop/beautiful-mermaid/beautiful-mermaid/assets/preview.html`
+> - URL：`assets/preview.html`（直接用相对路径，或启动 HTTP 服务器后用 `http://localhost:xxx/assets/preview.html`）
 >
 > **唯一例外**：用户明确说"直接渲染，不用预览"或"跳过预览"时，才可跳过 preview 步骤。
 >
@@ -170,7 +170,7 @@ bun add beautiful-mermaid
 提供可视化的样式定制界面，**AI 必须用 `preview_url` 工具直接以文件路径打开**（在 IDE 内置浏览器中显示，无需服务器）：
 
 ```
-preview_url("file:///Users/chouray/Desktop/beautiful-mermaid/beautiful-mermaid/assets/preview.html")
+preview_url("assets/preview.html")
 ```
 
 ❌ 禁止使用 `open`/`start` 命令或启动任何 HTTP 服务器。
@@ -628,7 +628,7 @@ const richTheme = {
 
 **Step 1 — 在 Playground 中确认风格（强制）**
 
-AI 直接用 `preview_url` 工具打开 `file:///Users/chouray/Desktop/beautiful-mermaid/beautiful-mermaid/assets/preview.html`（无需服务器，见上方"AI 预览工作规则"）。用户在页面中选择主题和预设后，底部会实时显示 CLI 命令栏：
+AI 直接用 `preview_url` 工具打开 `assets/preview.html`（无需服务器，见上方"AI 预览工作规则"）。用户在页面中选择主题和预设后，底部会实时显示 CLI 命令栏：
 
 ```
 node scripts/render.js input.mmd -t dracula -p gradient -o output-dracula-gradient.svg

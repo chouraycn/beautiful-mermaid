@@ -1257,10 +1257,6 @@ function buildDiagramCards(diagrams, colors, isLight) {
            role="button" tabindex="0"
            aria-label="点击全屏查看 ${escHtml(meta.title)}">
         <div class="svg-render-inner" id="svg-container-${i}">${svgOrFallback}</div>
-        <span class="svg-zoom-hint" aria-hidden="true">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-          点击全屏查看
-        </span>
       </div>
 
       ${flowSummaryHtml}
@@ -1268,7 +1264,7 @@ function buildDiagramCards(diagrams, colors, isLight) {
 
       <!-- Code Toggle Footer -->
       <div class="card-footer">
-        <button class="code-toggle-btn" onclick="toggleCode('code-${i}', this)" aria-expanded="false">
+        <button class="code-toggle-btn" data-code-id="code-${i}" aria-expanded="false">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
           查看源码
           <svg class="toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
@@ -1277,7 +1273,7 @@ function buildDiagramCards(diagrams, colors, isLight) {
       <div class="code-block" id="code-${i}">
         <div class="code-block-header">
           <span class="code-lang-tag">mermaid</span>
-          <button class="copy-btn" onclick="copyCode('code-src-${i}')">
+          <button class="copy-btn" data-copy-id="code-src-${i}">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             复制
           </button>
@@ -2292,7 +2288,6 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       align-items: center;
       justify-content: center;
       padding: 40px;
-      cursor: zoom-out;
     }
     .fullscreen-overlay.show {
       display: flex;
@@ -2352,9 +2347,9 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       font-size: 10px;
       line-height: 16px;
     }
-    /* SVG 区域点击全屏：pointer-events:none 让 SVG 内部元素不吸收点击，点击自然冒泡到 .svg-render-area */
+    /* SVG 区域点击全屏 */
     .svg-render-area {
-      cursor: zoom-in;
+      cursor: pointer;
     }
     .svg-render-area:focus-visible {
       outline: 2px solid var(--accent);
@@ -2365,24 +2360,6 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
     .svg-render-inner svg * {
       pointer-events: none !important;
     }
-    .svg-zoom-hint {
-      position: absolute;
-      bottom: 10px;
-      right: 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 9px;
-      border-radius: 20px;
-      background: ${isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.08)'};
-      font-size: 10.5px;
-      color: var(--muted);
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s;
-      font-family: inherit;
-    }
-    .svg-render-area:hover .svg-zoom-hint { opacity: 1; }
 
     /* ─── Responsive ────────────────────────────── */
     @media (max-width: 960px) {
@@ -2496,7 +2473,9 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
 
 <script>
 // ─── TOC 高亮（基于 IntersectionObserver）+ URL hash 深链接
+// IIFE 包装已移除，所有代码在全局作用域执行
 (function() {
+  // 检查元素是否存在
   const tocLinks = document.querySelectorAll('.toc-item');
   const sections = document.querySelectorAll('.diagram-section');
   if (!sections.length) return;
@@ -2565,101 +2544,23 @@ function closeSidebar() {
   if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
 }
 
-// ─── 代码块展开/收起
-function toggleCode(id, btn) {
-  const block = document.getElementById(id);
-  if (!block) return;
-  const isOpen = block.classList.toggle('open');
-  btn.classList.toggle('open', isOpen);
-  btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  // 更新按钮文本（第三个文本节点）
-  for (const node of btn.childNodes) {
-    if (node.nodeType === 3 && node.textContent.trim()) {
-      node.textContent = isOpen ? ' 收起源码' : ' 查看源码';
-      break;
-    }
-  }
-}
-
-// ─── 复制代码
-async function copyCode(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  try {
-    await navigator.clipboard.writeText(el.textContent);
-    const btn = el.closest('.code-block').querySelector('.copy-btn');
-    if (btn) {
-      const orig = btn.innerHTML;
-      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 已复制';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
-    }
-  } catch(e) {
-    try {
-      const range = document.createRange();
-      range.selectNode(el);
-      window.getSelection().removeAllRanges();
-      window.getSelection().addRange(range);
-      document.execCommand('copy');
-      window.getSelection().removeAllRanges();
-    } catch(_) {}
-}
-
-// ─── SVG 区域点击全屏（事件委托，在 document 级捕获）
+// ─── 事件委托：代码块按钮（使用事件委托确保兼容性）
 document.addEventListener('click', function(e) {
-  const area = e.target.closest('.svg-render-area');
-  if (!area) return;
-  const idx = parseInt(area.dataset.idx, 10);
-  if (!isNaN(idx)) openFullscreen(idx);
-});
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' || e.key === ' ') {
-    const area = e.target.closest('.svg-render-area');
-    if (!area) return;
-    e.preventDefault();
-    const idx = parseInt(area.dataset.idx, 10);
-    if (!isNaN(idx)) openFullscreen(idx);
+  // 查看源码按钮
+  const toggleBtn = e.target.closest('.code-toggle-btn');
+  if (toggleBtn) {
+    const id = toggleBtn.dataset.codeId;
+    if (id) window.toggleCode(id, toggleBtn);
+    return;
+  }
+  // 复制按钮
+  const copyBtn = e.target.closest('.copy-btn');
+  if (copyBtn) {
+    const id = copyBtn.dataset.copyId;
+    if (id) window.copyCode(id);
+    return;
   }
 });
-
-// ─── 全屏查看 SVG
-function openFullscreen(idx) {
-  const container = document.getElementById('svg-container-' + idx);
-  if (!container) return;
-  const svgEl = container.querySelector('svg');
-  if (!svgEl) return;
-  const fsContent = document.getElementById('fullscreen-content');
-  fsContent.innerHTML = '';
-  const clone = svgEl.cloneNode(true);
-  clone.removeAttribute('width');
-  clone.removeAttribute('height');
-  clone.style.maxWidth  = '90vw';
-  clone.style.maxHeight = '90vh';
-  clone.style.width     = 'auto';
-  clone.style.height    = 'auto';
-  // 全屏内的 SVG 允许交互（拖动等）
-  clone.style.pointerEvents = 'all';
-  clone.querySelectorAll('*').forEach(el => el.style.pointerEvents = '');
-  fsContent.appendChild(clone);
-  const overlay = document.getElementById('fullscreen-overlay');
-  overlay.classList.add('show');
-  document.body.style.overflow = 'hidden';
-  const closeBtn = overlay.querySelector('.fullscreen-close');
-  if (closeBtn) setTimeout(() => closeBtn.focus(), 50);
-}
-function closeFullscreen(e) {
-  if (e && e.type === 'click') {
-    // 只允许点击纯背景遮罩（overlay 本身）或关闭按钮时关闭；点击 SVG 内容区不关闭
-    const overlay = document.getElementById('fullscreen-overlay');
-    const isBackdrop = e.target === overlay;
-    const isCloseBtn = e.target.closest && e.target.closest('.fullscreen-close');
-    if (!isBackdrop && !isCloseBtn) return;
-  }
-  const overlay = document.getElementById('fullscreen-overlay');
-  if (!overlay) return;
-  overlay.classList.remove('show');
-  document.body.style.overflow = '';
-}
 
 // ─── 全屏弹窗：移动端触摸手势（下滑关闭）
 (function() {
@@ -2701,9 +2602,19 @@ document.addEventListener('keydown', e => {
     const tag = document.activeElement && document.activeElement.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return; // 输入框内不触发
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+      // 尝试多种全屏API
+      const requestFS = document.documentElement.requestFullscreen
+        || document.documentElement.webkitRequestFullscreen
+        || document.documentElement.mozRequestFullScreen
+        || document.documentElement.msRequestFullscreen;
+      requestFS && requestFS.call(document.documentElement);
     } else {
-      document.exitFullscreen && document.exitFullscreen();
+      // 尝试多种退出全屏API
+      const exitFS = document.exitFullscreen
+        || document.webkitExitFullscreen
+        || document.mozCancelFullScreen
+        || document.msExitFullscreen;
+      exitFS && exitFS.call(document);
     }
   }
 });
@@ -2736,6 +2647,70 @@ document.addEventListener('keydown', e => {
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 })();
+
+// ─── 全局函数（在 IIFE 外部定义，确保全局可用）
+window.toggleCode = function(id, btn) {
+  const block = document.getElementById(id);
+  if (!block) return;
+  const isOpen = block.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  for (const node of btn.childNodes) {
+    if (node.nodeType === 3 && node.textContent.trim()) {
+      node.textContent = isOpen ? ' 收起源码' : ' 查看源码';
+      break;
+    }
+  }
+};
+
+window.copyCode = async function(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  try {
+    await navigator.clipboard.writeText(el.textContent);
+    const btn = el.closest('.code-block').querySelector('.copy-btn');
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 已复制';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+    }
+  } catch(e) {
+    try {
+      const range = document.createRange();
+      range.selectNode(el);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      document.execCommand('copy');
+      window.getSelection().removeAllRanges();
+    } catch(_) {}
+  }
+};
+
+window.openFullscreen = function(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const svgEl = container.querySelector('svg');
+  if (!svgEl) return;
+  const fsContent = document.getElementById('fullscreen-content');
+  fsContent.innerHTML = '';
+  const clone = svgEl.cloneNode(true);
+  clone.setAttribute('width', '100%');
+  clone.setAttribute('height', '100%');
+  fsContent.appendChild(clone);
+  const overlay = document.getElementById('fullscreen-overlay');
+  overlay.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  // 聚焦以便接收 ESC 键
+  overlay.focus();
+};
+
+window.closeFullscreen = function(e) {
+  if (e && e.target !== e.currentTarget) return;
+  const overlay = document.getElementById('fullscreen-overlay');
+  overlay.classList.remove('show');
+  document.body.style.overflow = '';
+};
 </script>
 </body>
 </html>`;
