@@ -1819,26 +1819,39 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       font-weight: 500;
     }
 
-    /* ─── Summary Section (独立风格，不使用图表主题色) ─── */
+    /* ─── Summary Section (独立风格，与图表区域明显区分) ─── */
     .summary-section {
-      margin-top: 40px;
-      padding: 24px 28px;
-      background: ${adjustBrightness(colors.bg, 3)};
-      border: 2px dashed ${colors.border};
-      border-radius: 8px;
+      margin-top: 80px;
+      padding: 32px 36px;
+      background: ${adjustBrightness(colors.bg, 8)};
+      border: 2px double ${colors.border};
+      border-radius: 4px;
+      position: relative;
+    }
+    /* 分隔装饰线 */
+    .summary-section::before {
+      content: "";
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: ${colors.muted};
+      border-radius: 2px;
     }
     .summary-title {
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 15px;
+      font-weight: 500;
       color: ${colors.muted};
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
     }
-    .summary-title svg { color: ${colors.muted}; opacity: 0.7; }
+    .summary-title svg { color: ${colors.muted}; opacity: 0.5; }
     .summary-content {
       font-size: 14px;
       line-height: 1.7;
@@ -1846,29 +1859,30 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
     }
     .summary-content p { margin-bottom: 12px; }
     .success-factors {
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px dashed ${colors.border};
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid ${colors.border};
     }
     .success-factors-title {
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 500;
       color: ${colors.muted};
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
     }
     .success-factor {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 8px;
+      gap: 12px;
+      margin-bottom: 10px;
       font-size: 13px;
       color: ${colors.fg};
+      opacity: 0.85;
     }
     .success-factor svg {
       flex-shrink: 0;
-      margin-top: 2px;
+      margin-top: 3px;
       color: ${colors.muted};
       opacity: 0.8;
     }
