@@ -1263,8 +1263,11 @@ function buildDiagramCards(diagrams, colors, isLight) {
     const titleFg = isLight ? colors.fg : '#ffffff';
 
     // SVG 内容：若为空则显示 fallback UI
-    const hasSvg = svgContent && svgContent.trim().length > 30;
-    const svgOrFallback = hasSvg ? svgContent : `
+    // 移除 SVG 内部的 @import（会导致网络请求）
+    const rawSvg = svgContent || '';
+    const cleanSvg = rawSvg.replace(/@import\s+url\([^)]+\);?/gi, '');
+    const hasSvg = cleanSvg && cleanSvg.trim().length > 30;
+    const svgOrFallback = hasSvg ? cleanSvg : `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;color:var(--muted);text-align:center;">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
