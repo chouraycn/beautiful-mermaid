@@ -79,6 +79,7 @@ function parseArgs() {
   const options = {
     title: null,
     subtitle: null,
+    overview: null,     // 文档概述
     diagrams: [],
     batch: null,
     theme: 'tokyo-night',
@@ -119,6 +120,10 @@ function parseArgs() {
         break;
       case '--subtitle':
         options.subtitle = args[++i];
+        break;
+      case '--overview':
+      case '--doc':
+        options.overview = args[++i];
         break;
       case '--help':
       case '-h':
@@ -526,6 +531,11 @@ function parseMmdMeta(content, filename) {
     metaCards: [],  // 手动声明的 @meta 卡片（优先级高于自动分析）
     type: null,
     typeDetail: null,
+    overview: null,      // 文档概述
+    summary: null,       // 业务流程总结
+    analysis: null,     // 分析归纳文字
+    keyNodes: null,     // 关键业务节点
+    priority: 999,     // 排序优先级（数字越小越靠前）
   };
 
   const lines = content.split('\n');
@@ -539,6 +549,13 @@ function parseMmdMeta(content, filename) {
       case 'desc':  meta.desc  = v; break;
       case 'icon':  meta.icon  = v; break;
       case 'type':  meta.type  = v; break;
+      case 'overview': meta.overview = v; break;       // 文档概述
+      case 'summary': meta.summary = v; break;         // 业务流程总结
+      case 'analysis': meta.analysis = v; break;       // 分析归纳文字
+      case 'keyNodes': meta.keyNodes = v; break;       // 关键业务节点
+      case 'priority':
+        meta.priority = parseInt(v, 10) || 999;
+        break;
       case 'meta':
         meta.metaCards = v.split('|').slice(0, 3).map(pair => {
           const idx = pair.indexOf(':');
@@ -1157,6 +1174,53 @@ function buildSelfCheckPanel(checks, isLight) {
 }
 
 /**
+ * 构建业务流程总结区域
+ */
+function buildSummarySection(diagrams, colors, isLight) {
+  // 收集所有图表的 summary
+  const summaries = diagrams
+    .map(d => d.meta.summary)
+    .filter(s => s && s.trim());
+
+  if (!summaries.length) return '';
+
+  // 提取关键成功因素（从所有图表的 keyNodes 中去重提取）
+  const allKeyNodes = diagrams
+    .map(d => d.meta.keyNodes)
+    .filter(n => n && n.trim())
+    .join('|')
+    .split('|')
+    .map(s => s.trim())
+    .filter(s => s);
+  const uniqueKeyNodes = [...new Set(allKeyNodes)].slice(0, 6);
+
+  const checkIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+  return `
+  <!-- Business Summary Section -->
+  <section class="summary-section">
+    <div class="summary-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      业务流程总结
+    </div>
+    <div class="summary-content">
+      ${summaries.map(s => `<p>${escHtml(s)}</p>`).join('')}
+    </div>
+    ${uniqueKeyNodes.length ? `
+    <div class="success-factors">
+      <div class="success-factors-title">关键成功因素</div>
+      ${uniqueKeyNodes.map(node => `
+        <div class="success-factor">
+          ${checkIcon}
+          <span>${escHtml(node)}</span>
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+  </section>`;
+}
+
+/**
  * 构建 stats 统计区（每个卡片含 icon + accent bar + 三行文字）
  */
 function buildStatsGrid(infoCards, accentColor, isLight) {
@@ -1252,11 +1316,38 @@ function buildDiagramCards(diagrams, colors, isLight) {
         ${statsGrid}
       </div>
 
+      ${meta.analysis ? `
+      <!-- Analysis Block -->
+      <div class="analysis-block">
+        <div class="analysis-label">分析归纳</div>
+        <div class="analysis-text">${escHtml(meta.analysis)}</div>
+        ${meta.keyNodes ? `
+        <div class="key-nodes">
+          ${meta.keyNodes.split('|').filter(n => n.trim()).map(n => `
+            <span class="key-node-tag">${escHtml(n.trim())}</span>
+          `).join('')}
+        </div>
+        ` : ''}
+      </div>
+      ` : ''}
+
       <!-- SVG Render Area -->
       <div class="svg-render-area" data-idx="${i}"
            role="button" tabindex="0"
            aria-label="点击全屏查看 ${escHtml(meta.title)}">
-        <div class="svg-render-inner" id="svg-container-${i}">${svgOrFallback}</div>
+        <!-- SVG Controls -->
+        <div class="svg-controls">
+          <button class="svg-control-btn" onclick="window.svgZoomIn(${i})" title="放大" aria-label="放大">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <button class="svg-control-btn" onclick="window.svgZoomOut(${i})" title="缩小" aria-label="缩小">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <button class="svg-control-btn" onclick="window.downloadSvg(${i})" title="下载 SVG" aria-label="下载 SVG">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+        </div>
+        <div class="svg-render-inner" id="svg-container-${i}" style="transition: transform 0.2s ease;">${svgOrFallback}</div>
       </div>
 
       ${flowSummaryHtml}
@@ -1320,9 +1411,20 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
   const headingFg = isLight ? adjustBrightness(colors.fg, -20) : '#ffffff';
   const badgeFg = isLight ? colors.bg : '#ffffff';
 
+  // 图表排序：按 priority 排序（数字越小越靠前），默认 999
+  const sortedDiagrams = [...diagrams].sort((a, b) => {
+    const pa = a.meta.priority ?? 999;
+    const pb = b.meta.priority ?? 999;
+    return pa - pb;
+  });
+
+  // 从第一个图表提取文档概述（若未单独指定）
+  const docOverview = options.overview || (sortedDiagrams[0]?.meta?.overview || '');
+
   // 构建各区块
-  const tocNav = buildTocNav(diagrams, isLight);
-  const diagramCards = buildDiagramCards(diagrams, colors, isLight);
+  const tocNav = buildTocNav(sortedDiagrams, isLight);
+  const diagramCards = buildDiagramCards(sortedDiagrams, colors, isLight);
+  const summarySection = buildSummarySection(sortedDiagrams, colors, isLight);
 
   // accent 渐变（用于 stat-accent-bar 和一些 hover 效果）
   const accentRgb = hexToRgb(colors.accent);
@@ -1662,6 +1764,142 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       margin-left: 0;
       max-width: 100%;
     }
+
+    /* ─── Document Overview ───────────────────────── */
+    .doc-overview {
+      margin-bottom: 32px;
+      padding: 24px;
+      background: linear-gradient(135deg, ${adjustBrightness(colors.bg, -8)} 0%, ${colors.surface} 100%);
+      border-radius: 12px;
+      border: 1px solid ${colors.border};
+    }
+    .overview-content {
+      font-size: 15px;
+      line-height: 1.7;
+      color: ${colors.fg};
+    }
+    .overview-content p { margin-bottom: 12px; }
+    .overview-content p:last-child { margin-bottom: 0; }
+
+    /* ─── Analysis & Key Nodes ───────────────────── */
+    .analysis-block {
+      margin-bottom: 16px;
+      padding: 16px;
+      background: ${colors.surface};
+      border-radius: 8px;
+      border-left: 3px solid ${colors.accent};
+    }
+    .analysis-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: ${colors.accent};
+      margin-bottom: 8px;
+    }
+    .analysis-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: ${colors.fg};
+    }
+    .key-nodes {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .key-node-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: ${colors.accent}18;
+      color: ${colors.accent};
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* ─── Summary Section ─────────────────────────── */
+    .summary-section {
+      margin-top: 40px;
+      padding: 28px;
+      background: linear-gradient(135deg, ${adjustBrightness(colors.accent, -30)}15 0%, ${colors.surface} 100%);
+      border-radius: 12px;
+      border: 1px solid ${colors.accent}33;
+    }
+    .summary-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: ${colors.fg};
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .summary-title svg { color: ${colors.accent}; }
+    .summary-content {
+      font-size: 14px;
+      line-height: 1.7;
+      color: ${colors.fg};
+    }
+    .summary-content p { margin-bottom: 12px; }
+    .success-factors {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid ${colors.border};
+    }
+    .success-factors-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: ${colors.accent};
+      margin-bottom: 12px;
+    }
+    .success-factor {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: ${colors.fg};
+    }
+    .success-factor svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+      color: ${colors.accent};
+    }
+
+    /* ─── SVG Controls (Zoom) ────────────────────── */
+    .svg-controls {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .svg-render-area:hover .svg-controls { opacity: 1; }
+    .svg-control-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: ${colors.surface};
+      border: 1px solid ${colors.border};
+      border-radius: 6px;
+      cursor: pointer;
+      color: ${colors.fg};
+      transition: all 0.15s;
+    }
+    .svg-control-btn:hover {
+      background: ${colors.accent};
+      border-color: ${colors.accent};
+      color: #fff;
+    }
+    .svg-control-btn svg { width: 16px; height: 16px; }
 
     /* ─── Diagram Section ───────────────────────── */
     .diagram-section {
@@ -2466,7 +2704,9 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
 
   <!-- ─── Main Content ─── -->
   <main class="main-content" id="main-content" role="main" tabindex="-1">
+    ${docOverview ? `<section class="doc-overview"><div class="overview-content">${escHtml(docOverview)}</div></section>` : ''}
     ${diagramCards}
+    ${summarySection}
   </main>
 
 </div>
@@ -2710,6 +2950,46 @@ window.closeFullscreen = function(e) {
   const overlay = document.getElementById('fullscreen-overlay');
   overlay.classList.remove('show');
   document.body.style.overflow = '';
+};
+
+// SVG 缩放控制
+window.svgZoomState = window.svgZoomState || {};
+window.svgZoomIn = function(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const current = window.svgZoomState[idx] || 1;
+  const next = Math.min(current + 0.25, 3);
+  window.svgZoomState[idx] = next;
+  container.style.transform = 'scale(' + next + ')';
+};
+window.svgZoomOut = function(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const current = window.svgZoomState[idx] || 1;
+  const next = Math.max(current - 0.25, 0.5);
+  window.svgZoomState[idx] = next;
+  container.style.transform = 'scale(' + next + ')';
+};
+window.downloadSvg = function(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const svgEl = container.querySelector('svg');
+  if (!svgEl) return;
+  // 序列化 SVG
+  const serializer = new XMLSerializer();
+  let svgStr = serializer.serializeToString(svgEl);
+  // 添加 XML 声明
+  svgStr = '<?xml version="1.0" encoding="UTF-8"?>' + svgStr;
+  // 创建下载链接
+  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'diagram-' + (idx + 1) + '.svg';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
 </script>
 </body>
