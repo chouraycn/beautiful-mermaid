@@ -1437,9 +1437,6 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escHtml(title)} — Beautiful Mermaid</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     /* ─── Skip Link (WCAG 2.4.1) ────────────────── */
     .skip-link {
@@ -1488,8 +1485,7 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
     body {
       background: var(--bg);
       color: var(--fg);
-      font-family: 'Fira Sans', 'Inter', -apple-system, 'PingFang SC',
-                   'Noto Sans SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+      font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
       font-size: 14px;
       line-height: 1.6;
       min-height: 100vh;
@@ -1820,24 +1816,26 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       font-weight: 500;
     }
 
-    /* ─── Summary Section ─────────────────────────── */
+    /* ─── Summary Section (独立风格，不使用图表主题色) ─── */
     .summary-section {
       margin-top: 40px;
-      padding: 28px;
-      background: linear-gradient(135deg, ${adjustBrightness(colors.accent, -30)}15 0%, ${colors.surface} 100%);
-      border-radius: 12px;
-      border: 1px solid ${colors.accent}33;
+      padding: 24px 28px;
+      background: ${adjustBrightness(colors.bg, 3)};
+      border: 2px dashed ${colors.border};
+      border-radius: 8px;
     }
     .summary-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: ${colors.fg};
+      font-size: 16px;
+      font-weight: 600;
+      color: ${colors.muted};
       margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    .summary-title svg { color: ${colors.accent}; }
+    .summary-title svg { color: ${colors.muted}; opacity: 0.7; }
     .summary-content {
       font-size: 14px;
       line-height: 1.7;
@@ -1847,26 +1845,29 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
     .success-factors {
       margin-top: 20px;
       padding-top: 16px;
-      border-top: 1px solid ${colors.border};
+      border-top: 1px dashed ${colors.border};
     }
     .success-factors-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
-      color: ${colors.accent};
+      color: ${colors.muted};
       margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     .success-factor {
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       font-size: 13px;
       color: ${colors.fg};
     }
     .success-factor svg {
       flex-shrink: 0;
       margin-top: 2px;
-      color: ${colors.accent};
+      color: ${colors.muted};
+      opacity: 0.8;
     }
 
     /* ─── SVG Controls (Zoom) ────────────────────── */
@@ -1876,11 +1877,14 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       right: 12px;
       display: flex;
       gap: 6px;
-      z-index: 10;
-      opacity: 0;
+      z-index: 100;
+      opacity: 0.7;
       transition: opacity 0.2s;
     }
     .svg-render-area:hover .svg-controls { opacity: 1; }
+    .svg-controls button {
+      pointer-events: auto;
+    }
     .svg-control-btn {
       width: 32px;
       height: 32px;
@@ -2199,8 +2203,7 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       padding: 20px 22px;
       background: var(--code-bg);
       overflow-x: auto;
-      font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code',
-                   'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
+      font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
       font-size: 12.5px;
       line-height: 1.75;
       color: var(--fg);
@@ -2638,8 +2641,8 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
 <!-- ─── Fullscreen SVG Overlay ─── -->
-<div class="fullscreen-overlay" id="fullscreen-overlay" role="dialog" aria-modal="true" aria-label="Full screen diagram" onclick="closeFullscreen(event)">
-  <button class="fullscreen-close" onclick="closeFullscreen()" aria-label="Close fullscreen (ESC)">
+<div class="fullscreen-overlay" id="fullscreen-overlay" role="dialog" aria-modal="true" aria-label="Full screen diagram" onclick="window.closeFullscreen(event)">
+  <button class="fullscreen-close" onclick="window.closeFullscreen()" aria-label="Close fullscreen (ESC)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
     </svg>
