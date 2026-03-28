@@ -298,35 +298,63 @@
       outline: none;
     }
 
-    /* 图表类型选择 */
+    /* 图表类型选择 - 单一选择 */
     .chart-type-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
+      gap: 10px;
     }
 
     .chart-type-chip {
       font-family: inherit;
-      font-size: 11px;
-      font-weight: 500;
-      padding: 8px 6px;
+      font-size: 12px;
+      padding: 12px 10px;
       background: var(--button-bg);
       color: var(--text-secondary);
-      border: 1px solid transparent;
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       cursor: pointer;
-      transition: all 0.15s ease;
-      text-align: center;
+      transition: all 0.2s ease;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .chart-type-chip:hover {
       border-color: var(--text-secondary);
+      transform: translateY(-1px);
     }
 
     .chart-type-chip.active {
       background: var(--text);
       color: #fff;
       border-color: var(--text);
+    }
+
+    .chart-type-chip .chart-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .chart-type-chip .chart-name {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .chart-type-chip .chart-desc {
+      font-size: 10px;
+      opacity: 0.75;
+      font-weight: 400;
+    }
+
+    .chart-demo-hint {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      background: var(--bg);
+      padding: 8px 12px;
+      border-radius: var(--radius);
     }
 
     /* 代码编辑器 */
@@ -506,6 +534,27 @@
     .export-btn.secondary {
       background: var(--button-bg);
       color: var(--text);
+    }
+
+    .export-btn.primary {
+      background: linear-gradient(180deg, #52525b 0%, #3f3f46 100%);
+      color: #fafafa;
+      font-weight: 500;
+      padding: 14px 32px;
+      font-size: 15px;
+      border-radius: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      letter-spacing: 0.3px;
+    }
+
+    .export-btn.primary:hover {
+      background: linear-gradient(180deg, #3f3f46 0%, #27272a 100%);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .export-row.single-btn {
+      justify-content: center;
     }
 
     .export-btn svg {
@@ -783,8 +832,8 @@ window.__BM = __BM_TEMP;
         <button class="tab active" data-tab="themes">主题</button>
         <button class="tab" data-tab="presets">样式</button>
         <button class="tab" data-tab="colors">颜色</button>
-        <button class="tab" data-tab="chart-type">图表</button>
         <button class="tab" data-tab="code">代码</button>
+        <button class="tab" data-tab="chart">图表</button>
       </div>
     </header>
 
@@ -945,18 +994,57 @@ window.__BM = __BM_TEMP;
       </section>
 
       <!-- 图表类型选择 -->
-      <section class="section" id="chartTypeSection" style="display:none;">
-        <div class="section-title">图表类型</div>
+      <section class="section" id="chartSection" style="display:none;">
+        <div class="section-title">图表类型（单一选择）</div>
         <div class="chart-type-grid" id="chartTypeGrid">
-          <button class="chart-type-chip active" data-type="flowchart">流程图</button>
-          <button class="chart-type-chip" data-type="sequence">时序图</button>
-          <button class="chart-type-chip" data-type="state">状态图</button>
-          <button class="chart-type-chip" data-type="class">类图</button>
-          <button class="chart-type-chip" data-type="er">ER图</button>
-          <button class="chart-type-chip" data-type="bar">柱状图</button>
-          <button class="chart-type-chip" data-type="line">折线图</button>
-          <button class="chart-type-chip" data-type="combo">组合图</button>
-          <button class="chart-type-chip" data-type="horizontal">横向柱图</button>
+          <button class="chart-type-chip active" data-type="flowchart">
+            <span class="chart-icon">◇</span>
+            <span class="chart-name">流程图</span>
+            <span class="chart-desc">决策树、流程、状态</span>
+          </button>
+          <button class="chart-type-chip" data-type="sequence">
+            <span class="chart-icon">→</span>
+            <span class="chart-name">时序图</span>
+            <span class="chart-desc">交互顺序、时间线</span>
+          </button>
+          <button class="chart-type-chip" data-type="state">
+            <span class="chart-icon">◎</span>
+            <span class="chart-name">状态图</span>
+            <span class="chart-desc">状态转移、生命周期</span>
+          </button>
+          <button class="chart-type-chip" data-type="class">
+            <span class="chart-icon">▷</span>
+            <span class="chart-name">类图</span>
+            <span class="chart-desc">UML 类结构、继承</span>
+          </button>
+          <button class="chart-type-chip" data-type="er">
+            <span class="chart-icon">⬡</span>
+            <span class="chart-name">ER图</span>
+            <span class="chart-desc">数据库实体关系</span>
+          </button>
+          <button class="chart-type-chip" data-type="bar">
+            <span class="chart-icon">▮</span>
+            <span class="chart-name">柱状图</span>
+            <span class="chart-desc">x y轴数据可视化</span>
+          </button>
+          <button class="chart-type-chip" data-type="line">
+            <span class="chart-icon">↗</span>
+            <span class="chart-name">折线图</span>
+            <span class="chart-desc">趋势、增长曲线</span>
+          </button>
+          <button class="chart-type-chip" data-type="combo">
+            <span class="chart-icon">⬡</span>
+            <span class="chart-name">组合图</span>
+            <span class="chart-desc">柱+线混合展示</span>
+          </button>
+          <button class="chart-type-chip" data-type="horizontal">
+            <span class="chart-icon">▯</span>
+            <span class="chart-name">横向柱图</span>
+            <span class="chart-desc">标签较长时使用</span>
+          </button>
+        </div>
+        <div class="chart-demo-hint">
+          点击上方卡片切换图表示例，编辑器将自动加载对应的 Mermaid 代码模板
         </div>
       </section>
 
@@ -982,7 +1070,7 @@ window.__BM = __BM_TEMP;
             </div>
           </div>
           <textarea class="editor-textarea" id="codeEditor" spellcheck="false" placeholder="在此粘贴 Mermaid 代码...&#10;&#10;graph TD&#10;    A[Start] --> B[End]"></textarea>
-          <div class="editor-hint">Auto-renders on edit. Use the Chart tab to load examples.</div>
+          <div class="editor-hint">编辑后自动渲染。可点击上方「图表」标签切换图表示例</div>
         </div>
       </section>
 
@@ -1026,23 +1114,16 @@ window.__BM = __BM_TEMP;
           <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
         </svg>
       </div>
-      <!-- 第一排：复制 Config + 复制代码 -->
-      <div class="export-row">
-        <button class="export-btn secondary" id="copyConfig" data-tooltip="复制当前主题+预设的完整 JSON 配置&#10;包含颜色方案和 CLI 命令">
+      <!-- 复制设计 -->
+      <div class="export-row single-btn">
+        <button class="export-btn primary" id="copyConfig" data-tooltip="复制当前主题+预设的完整配置&#10;粘贴到 AI 对话框中使用">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
             <line x1="16" y1="13" x2="8" y2="13"/>
             <line x1="16" y1="17" x2="8" y2="17"/>
           </svg>
-          复制配置
-        </button>
-        <button class="export-btn secondary" id="copyCode" data-tooltip="复制可直接运行的 JS 代码&#10;renderMermaidSVG(code, THEMES[...])">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="16 18 22 12 16 6"/>
-            <polyline points="8 6 2 12 8 18"/>
-          </svg>
-          复制代码
+          复制设计
         </button>
       </div>
 
@@ -1147,37 +1228,29 @@ window.__BM = __BM_TEMP;
     function saveState() {
       try {
         const code = document.getElementById('codeEditor').value.trim();
-        const exampleCode = getExampleCode();
-        const isCustomCode = code && code !== exampleCode.trim();
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
           theme: currentTheme,
           preset: currentPreset,
-          chartType: selectedChartTypes[0] || 'flowchart',
-          selectedChartTypes,
+          chartType: currentChartType,
           customColors,
-          customCode: isCustomCode ? code : null
+          customCode: code || null
         }));
       } catch {}
     }
 
-    // 根据当前选中的类型生成示例代码（多选时拼接）
-    function getExampleCode() {
-      if (selectedChartTypes.length === 0) return chartCodes.flowchart || '';
-      if (selectedChartTypes.length === 1) return chartCodes[selectedChartTypes[0]] || '';
-      return selectedChartTypes
-        .map(t => chartCodes[t] || '')
-        .filter(Boolean)
-        .join('\n\n');
-    }
-
     const saved = loadState();
-    let currentTheme = (saved && saved.theme) || 'zinc-light';
-    let currentPreset = (saved && saved.preset) || 'default';
-    // 多选：selectedChartTypes 为数组，兼容旧的单值 chartType 存储
-    let selectedChartTypes = (saved && saved.selectedChartTypes) || (saved && saved.chartType ? [saved.chartType] : ['flowchart']);
-    // 兼容性别名（部分地方仍引用）
-    let currentChartType = selectedChartTypes[0] || 'flowchart';
+
+    // §2a 优先从 URL 参数读取 theme/preset（来自外部传入，如 last-render.json）
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlTheme = urlParams.get('theme');
+    const urlPreset = urlParams.get('preset');
+
+    // URL 参数 > localStorage > 默认值
+    let currentTheme = urlTheme || (saved && saved.theme) || 'zinc-light';
+    let currentPreset = urlPreset || (saved && saved.preset) || 'default';
     let customColors = (saved && saved.customColors) || { bg: '#ffffff', fg: '#27272a', line: '#6b7280' };
+    // 单一选择：图表类型
+    let currentChartType = (saved && saved.chartType) || 'flowchart';
 
     // 图表示例代码
     const chartCodes = {
@@ -1242,21 +1315,23 @@ window.__BM = __BM_TEMP;
     bar [30, 25, 20, 12, 8]`
     };
 
+    // 默认示例代码
+    const DEFAULT_CODE = chartCodes.flowchart;
+
     // DOM
     const themeGrid = document.getElementById('themeGrid');
     const presetGrid = document.getElementById('presetGrid');
-    const chartTypeGrid = document.getElementById('chartTypeGrid');
     const codeEditor = document.getElementById('codeEditor');
     const previewFrame = document.getElementById('previewFrame');
     const previewInfo = document.getElementById('previewInfo');
     const codePreview = document.getElementById('codePreview');
     const toast = document.getElementById('toast');
 
-    // 获取当前代码（自定义代码优先，否则用示例）
+    // 获取当前代码（自定义代码优先，否则用默认示例）
     function getCurrentCode() {
       const editorCode = codeEditor.value.trim();
       if (editorCode) return editorCode;
-      return getExampleCode();
+      return DEFAULT_CODE;
     }
 
     // 标签切换
@@ -1268,8 +1343,8 @@ window.__BM = __BM_TEMP;
         document.getElementById('themesSection').style.display = target === 'themes' ? 'block' : 'none';
         document.getElementById('presetsSection').style.display = target === 'presets' ? 'block' : 'none';
         document.getElementById('colorsSection').style.display = target === 'colors' ? 'block' : 'none';
-        document.getElementById('chartTypeSection').style.display = target === 'chart-type' ? 'block' : 'none';
         document.getElementById('codeSection').style.display = target === 'code' ? 'block' : 'none';
+        document.getElementById('chartSection').style.display = target === 'chart' ? 'block' : 'none';
         // 切换 tab 后自动回到顶部（定位到五个按钮上方的 header 处）
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
@@ -1301,30 +1376,19 @@ window.__BM = __BM_TEMP;
       updateInfo();
     });
 
-    // 图表类型选择 — 多选模式
+    // 图表类型选择 - 单一选择模式
+    const chartTypeGrid = document.getElementById('chartTypeGrid');
     chartTypeGrid.addEventListener('click', e => {
       const chip = e.target.closest('.chart-type-chip');
       if (!chip) return;
-      const type = chip.dataset.type;
-      const idx = selectedChartTypes.indexOf(type);
-      if (idx === -1) {
-        // 未选中 → 加入
-        selectedChartTypes.push(type);
-      } else {
-        // 已选中 → 取消（至少保留一个）
-        if (selectedChartTypes.length > 1) {
-          selectedChartTypes.splice(idx, 1);
-        }
-      }
-      currentChartType = selectedChartTypes[0] || 'flowchart';
-      // 更新按钮样式
-      chartTypeGrid.querySelectorAll('.chart-type-chip').forEach(c => {
-        c.classList.toggle('active', selectedChartTypes.includes(c.dataset.type));
-      });
-      // 加载示例到编辑器
-      codeEditor.value = getExampleCode();
+      chartTypeGrid.querySelectorAll('.chart-type-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentChartType = chip.dataset.type;
+      // 加载对应示例代码到编辑器
+      codeEditor.value = chartCodes[currentChartType] || chartCodes.flowchart;
       saveState();
       render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       updateInfo();
     });
 
@@ -1371,7 +1435,7 @@ window.__BM = __BM_TEMP;
 
     // 重置代码
     document.getElementById('resetCode').addEventListener('click', () => {
-      codeEditor.value = getExampleCode();
+      codeEditor.value = DEFAULT_CODE;
       saveState();
       render();
       updateInfo();
@@ -1480,18 +1544,8 @@ window.__BM = __BM_TEMP;
     function updateInfo() {
       const themeName = currentTheme.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
       const presetName = currentPreset.charAt(0).toUpperCase() + currentPreset.slice(1);
-      const editorCode = codeEditor.value.trim();
-      const exampleCode = getExampleCode();
-      const isCustom = editorCode && editorCode !== exampleCode.trim();
-      let typeSuffix;
-      if (isCustom) {
-        typeSuffix = ' + Custom';
-      } else if (selectedChartTypes.length === 1) {
-        typeSuffix = ` + ${selectedChartTypes[0].charAt(0).toUpperCase() + selectedChartTypes[0].slice(1)}`;
-      } else {
-        typeSuffix = ` + ${selectedChartTypes.length} Types`;
-      }
-      previewInfo.textContent = `${themeName} + ${presetName}${typeSuffix}`;
+      const chartTypeName = { flowchart: '流程图', sequence: '时序图', state: '状态图', 'class': '类图', er: 'ER图', bar: '柱状图', line: '折线图', combo: '组合图', horizontal: '横向柱' }[currentChartType] || currentChartType;
+      previewInfo.textContent = `${themeName} + ${presetName} + ${chartTypeName}`;
       updateCLIBar();
     }
 
@@ -1540,22 +1594,17 @@ window.__BM = __BM_TEMP;
       const config = {
         theme: currentTheme,
         preset: currentPreset,
+        chartType: currentChartType,
         themeColors: theme,
         cliCommand: buildCLICommand(),
-        npmUsage: `renderMermaidSVG(code, THEMES['${currentTheme}'])`,
       };
-      navigator.clipboard.writeText(JSON.stringify(config, null, 2))
-        .then(() => showToast('配置已复制'));
+      const jsonStr = JSON.stringify(config, null, 2);
+      // 添加使用说明
+      const fullText = `## 使用说明\n复制以下 JSON 配置到 AI 对话框中，AI 将自动应用此主题设计进行渲染\n\n${jsonStr}`;
+      navigator.clipboard.writeText(fullText)
+        .then(() => showToast('设计已复制到剪贴板'));
     });
 
-    // ── Copy Code：复制 JS 使用代码 ──
-    document.getElementById('copyCode').addEventListener('click', () => {
-      const code = getCurrentCode();
-      // 转义 code 中的反引号和 ${...}，防止模板字符串被破坏（粘贴到 AI 对话框卡死的根因）
-      const safeCode = code.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
-      const copyText = `import { renderMermaidSVG, THEMES } from 'beautiful-mermaid';\n\nconst svg = renderMermaidSVG(\`${safeCode}\`, THEMES['${currentTheme}']);`;
-      navigator.clipboard.writeText(copyText).then(() => showToast('已复制！'));
-    });
 
 
 
@@ -1571,7 +1620,7 @@ window.__BM = __BM_TEMP;
       });
       // 图表类型
       chartTypeGrid.querySelectorAll('.chart-type-chip').forEach(c => {
-        c.classList.toggle('active', selectedChartTypes.includes(c.dataset.type));
+        c.classList.toggle('active', c.dataset.type === currentChartType);
       });
       // 自定义颜色
       ['bg', 'fg', 'line'].forEach(type => {
@@ -1584,7 +1633,7 @@ window.__BM = __BM_TEMP;
       if (saved && saved.customCode) {
         codeEditor.value = saved.customCode;
       } else {
-        codeEditor.value = getExampleCode();
+        codeEditor.value = chartCodes[currentChartType] || chartCodes.flowchart;
       }
     }
 
