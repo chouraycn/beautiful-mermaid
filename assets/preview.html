@@ -66,13 +66,9 @@
       height: 16px;
       border-radius: 3px;
       object-fit: contain;
-      /* 深色主题（默认）：变白色 */
-      filter: brightness(0) invert(1);
+      /* 固定黑色 */
+      filter: brightness(0);
       opacity: 0.90;
-    }
-    [data-theme="light"] .header-title img.logo {
-      filter: brightness(0.1);
-      opacity: 0.85;
     }
 
     /* 标签页 */
@@ -1548,6 +1544,29 @@ window.__BM = __BM_TEMP;
       previewInfo.textContent = `${themeName} + ${presetName} + ${chartTypeName}`;
       updateCLIBar();
     }
+
+    // 颜色更新函数
+    window.updateColor = function(type, value) {
+      customColors[type] = value;
+      document.getElementById(`${type}Swatch`).value = value;
+      document.getElementById(`${type}Hex`).value = value;
+      // 切换到自定义颜色模式
+      currentTheme = 'custom';
+      saveState();
+      render();
+      updateInfo();
+    };
+
+    window.updateColorFromText = function(type, value) {
+      if (/^#[0-9a-fA-F]{6}$/.test(value)) {
+        customColors[type] = value;
+        document.getElementById(`${type}Swatch`).value = value;
+        currentTheme = 'custom';
+        saveState();
+        render();
+        updateInfo();
+      }
+    };
 
     // 生成 CLI 命令字符串
     function buildCLICommand(inputFile = 'input.mmd', outputFile = null) {
