@@ -26,21 +26,12 @@
  *   --help, -h       显示帮助
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-
-// sharp 仅在 PNG 渲染时按需加载，避免非 PNG 场景因 sharp 安装问题报错
-let _sharp = null;
-function getSharp() {
-  if (!_sharp) _sharp = require('sharp');
-  return _sharp;
-}
-
-// 从 styles.js 导入共享数据（唯一数据源）
-const {
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import {
   STYLE_PRESETS,
-  THEMES: LOCAL_THEMES,
+  THEMES,
   THEME_DEFAULTS,
   THEME_META,
   injectStylesToSVG,
@@ -52,7 +43,20 @@ const {
   resolveTheme,
   getDarkThemes,
   getLightThemes,
-} = require('./styles');
+} from './styles.js';
+
+// 本地主题别名（保持代码兼容）
+const LOCAL_THEMES = THEMES;
+
+// sharp 动态加载（仅 PNG 模式使用）
+let _sharp = null;
+async function loadSharp() {
+  if (!_sharp) {
+    const sharpModule = await import('sharp');
+    _sharp = sharpModule.default;
+  }
+  return _sharp;
+}
 
 // 解析命令行参数
 function parseArgs() {
@@ -427,7 +431,7 @@ async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, r
     const dpi = Math.max(72, Math.min(600, options.dpi));
     const outputWidth = Math.round(options.width * scale);
 
-    const pngBuffer = await getSharp()(Buffer.from(svgOutput))
+    const pngBuffer = await loadSharp()(Buffer.from(svgOutput))
       .resize(outputWidth, null, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .png({ quality: 100, density: dpi })
       .toBuffer();

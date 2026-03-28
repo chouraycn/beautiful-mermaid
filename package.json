@@ -2,7 +2,7 @@
   "name": "beautiful-mermaid-skill",
   "version": "1.0.0",
   "description": "CodeBuddy Skill for rendering beautiful Mermaid diagrams to SVG or ASCII art",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "render": "node scripts/render.js",
     "render:svg": "node scripts/render.js --format svg",
@@ -30,10 +30,10 @@
     "state-diagram",
     "codebuddy-skill"
   ],
-  "license": "MIT",
+  "license": "MIT-0",
   "author": {
-    "name": "chouray",
-    "url": "https://github.com/chouraycn"
+    "name": "CodeBuddy",
+    "url": "https://codebuddy.ai"
   },
   "engines": {
     "node": ">=16.0.0"

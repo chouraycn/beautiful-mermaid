@@ -22,3 +22,20 @@
 - .gitignore 已创建（排除 node_modules/.DS_Store/.workbuddy/）
 - 已删除 .gitattributes、assets/examples/er-diagram.mmd
 - 排除 node_modules 后发布包总大小约 1.9MB（无超过 10MB 的文件）
+
+## 修复记录（2026-03-28）
+### 问题 1：package.json 模块类型冲突 ✓ 已修复
+- 将 `"type": "commonjs"` 改为 `"type": "module"`
+- 将 `license` 改为 `MIT-0`
+- scripts/*.js 的 `require()` 全部改为 ES6 `import`
+- sharp 改为动态 `import()` 避免顶层加载错误
+
+### 问题 2：SKILL.md 与已安装版本不同步 ✓ 已修复
+- 主题数量从 15 更新为 17（新增 orange-dark, orange-light）
+- THEMES 表格补充缺失的橙色主题
+- 代码示例中的 `require()` 改为 `import`
+
+### 问题 3：非标准 frontmatter 字段 ✓ 已修复
+- 添加 `version: "1.1.3"`
+- 添加 `homepage`, `author`, `keywords`, `triggers`
+- 将触发词从 description 拆分到独立 `triggers` 数组

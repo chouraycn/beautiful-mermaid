@@ -879,7 +879,7 @@ function checkThemeReadability(themeName) {
 // §8  导出
 // ─────────────────────────────────────────────────────────────────────────────
 
-module.exports = {
+export {
   // 字体度量
   MONO_FONT,
   MONO_FONT_STACK,

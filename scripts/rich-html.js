@@ -52,17 +52,19 @@ function getTypeLabel(type) {
  *     --output result.html
  */
 
-const fs = require('fs');
-const path = require('path');
-
-const {
+import fs from 'fs';
+import path from 'path';
+import {
   STYLE_PRESETS,
-  THEMES: LOCAL_THEMES,
+  THEMES,
   injectStylesToSVG,
   isValidPreset,
   resolveTheme,
   getRecommendedPreset,
-} = require('./styles');
+} from './styles.js';
+
+// 本地主题别名（保持代码兼容）
+const LOCAL_THEMES = THEMES;
 
 // ─── CLI 参数解析 ───────────────────────────────────────────────────────────
 
