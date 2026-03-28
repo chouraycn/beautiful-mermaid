@@ -336,6 +336,63 @@ const THEME_META = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// §4b  语义角色颜色（Semantic Role Colors）
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// AI 在 .mmd 中写 `classDef critical bm-role:critical` 时，渲染管道会将其转换为
+// CSS class `.bm-critical`，然后此处的颜色规则生效。
+//
+// 颜色分为两套：
+//   light  —— 适用于亮色主题（bg 亮）
+//   dark   —— 适用于暗色主题（bg 暗）
+//
+// 5 个语义角色（对应自然语言含义）：
+//   critical  重要/关键节点（橙色系）
+//   success   成功/完成/正向（绿色系）
+//   danger    失败/警告/风险（红色系）
+//   info      信息/关键处理（蓝色系）
+//   muted     次要/跳过/禁用（灰色系）
+// ─────────────────────────────────────────────────────────────────────────────
+
+const SEMANTIC_ROLE_COLORS = {
+  critical: {
+    light: { fill: '#FFF7ED', stroke: '#F97316', text: '#9A3412' },
+    dark:  { fill: '#431407', stroke: '#F97316', text: '#FDBA74' },
+  },
+  success: {
+    light: { fill: '#F0FDF4', stroke: '#22C55E', text: '#166534' },
+    dark:  { fill: '#052e16', stroke: '#22C55E', text: '#86EFAC' },
+  },
+  danger: {
+    light: { fill: '#FEF2F2', stroke: '#EF4444', text: '#991B1B' },
+    dark:  { fill: '#450a0a', stroke: '#EF4444', text: '#FCA5A5' },
+  },
+  info: {
+    light: { fill: '#EFF6FF', stroke: '#3B82F6', text: '#1D4ED8' },
+    dark:  { fill: '#172554', stroke: '#3B82F6', text: '#93C5FD' },
+  },
+  muted: {
+    light: { fill: '#F4F4F5', stroke: '#A1A1AA', text: '#52525B' },
+    dark:  { fill: '#27272A', stroke: '#71717A', text: '#A1A1AA' },
+  },
+};
+
+/**
+ * 根据主题 bg 颜色判断是亮色还是暗色主题（简单亮度估算）
+ * @param {string} bg - hex 颜色值（如 '#1a1b26'）
+ * @returns {'light'|'dark'}
+ */
+function _themeTone(bg) {
+  if (!bg || bg.length < 7) return 'light';
+  const r = parseInt(bg.slice(1, 3), 16);
+  const g = parseInt(bg.slice(3, 5), 16);
+  const b = parseInt(bg.slice(5, 7), 16);
+  // 感知亮度 0..255
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance < 128 ? 'dark' : 'light';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // §5  视觉样式预设（Preset）—— 5 种
 // ─────────────────────────────────────────────────────────────────────────────
 // 预设控制形状几何（圆角、描边、阴影）和字体，与主题颜色正交组合。
@@ -554,7 +611,43 @@ ${root} .edgeLabel text,
 ${root} .edgeLabel {
   fill:      ${theme.muted || theme.fg} !important;
   font-size: ${FONT_SIZES.edgeLabel}px  !important;
-}`;
+}
+${_generateSemanticRoleCSS(root, theme)}`;
+}
+
+/**
+ * 生成语义角色 CSS 规则（在 generateCSSStyles 内部调用）
+ * 根据主题亮暗自动选择对应的颜色套装。
+ *
+ * Mermaid classDef 会给节点 <g> 追加 CSS 类名，
+ * 规则通过 `.bm-critical rect` 等选择器覆盖基础样式。
+ *
+ * @param {string} root   - 作用域选择器（如 '#bm-diagram-1' 或 'svg'）
+ * @param {object} theme  - 主题对象（含 bg）
+ * @returns {string}      - CSS 规则字符串
+ */
+function _generateSemanticRoleCSS(root, theme) {
+  const tone = _themeTone(theme.bg);
+  const parts = ['/* ── Semantic Role Colors ── */'];
+
+  for (const [role, colors] of Object.entries(SEMANTIC_ROLE_COLORS)) {
+    const c = colors[tone];
+    parts.push(
+      `${root} .bm-${role} rect,`,
+      `${root} .bm-${role} circle,`,
+      `${root} .bm-${role} ellipse,`,
+      `${root} .bm-${role} polygon {`,
+      `  fill:   ${c.fill}   !important;`,
+      `  stroke: ${c.stroke} !important;`,
+      `  stroke-width: 2px   !important;`,
+      `}`,
+      `${root} .bm-${role} text {`,
+      `  fill: ${c.text} !important;`,
+      `}`,
+    );
+  }
+
+  return parts.join('\n');
 }
 
 /**
@@ -995,6 +1088,86 @@ function checkThemeReadability(themeName) {
   };
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §8a  语义角色 SVG 后处理
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * 解析 .mmd 内容中的语义角色声明（`# @roles` 注释）
+ *
+ * 格式:
+ *   # @roles critical:A,B  success:C  danger:D,E  info:F  muted:G
+ *
+ * @param {string} mmdContent  - .mmd 文件内容（含注释行）
+ * @returns {Map<string, string>}  nodeId → roleName  (如 Map{ 'A' => 'critical' })
+ */
+function parseSemanticRoles(mmdContent) {
+  const roleMap = new Map();
+  for (const line of mmdContent.split('\n')) {
+    const m = line.match(/^#\s*@roles\s+(.*)/);
+    if (!m) continue;
+    // 解析形如: critical:A,B  success:C,D
+    const parts = m[1].trim().split(/\s+/);
+    for (const part of parts) {
+      const colonIdx = part.indexOf(':');
+      if (colonIdx < 0) continue;
+      const role    = part.slice(0, colonIdx).trim().toLowerCase();
+      const nodeIds = part.slice(colonIdx + 1).split(',').map(s => s.trim()).filter(Boolean);
+      if (!SEMANTIC_ROLE_COLORS[role]) continue;
+      for (const id of nodeIds) {
+        roleMap.set(id, role);
+      }
+    }
+  }
+  return roleMap;
+}
+
+/**
+ * 将语义角色 class 注入 SVG（字符串操作，无 DOM 依赖）
+ *
+ * 对于每个 `<g class="node" data-id="XXX"` 标签，
+ * 若 XXX 存在于 roleMap，则在 class 属性中追加 `bm-ROLE`。
+ *
+ * @param {string}             svgString  - 已渲染并注入主题样式的 SVG 字符串
+ * @param {Map<string, string>} roleMap   - nodeId → roleName
+ * @returns {string}  注入 class 后的 SVG 字符串
+ */
+function applySemanticRoles(svgString, roleMap) {
+  if (!roleMap || roleMap.size === 0) return svgString;
+
+  return svgString.replace(
+    /<g([^>]*?)data-id="([^"]+)"([^>]*?)>/g,
+    (match, before, nodeId, after) => {
+      const role = roleMap.get(nodeId);
+      if (!role) return match;
+
+      // 在 class="node ..." 中追加 bm-<role>
+      const withRole = (before + after).replace(
+        /class="([^"]*)"/,
+        (_, cls) => `class="${cls} bm-${role}"`
+      );
+      // 若前/后都没找到 class，直接追加
+      const allAttrs = (before + after).includes('class=')
+        ? withRole
+        : (before + after) + ` class="bm-${role}"`;
+
+      return `<g${allAttrs}data-id="${nodeId}">`;
+    }
+  );
+}
+
+/**
+ * 获取语义角色的人类可读标签（用于图例显示）
+ */
+const SEMANTIC_ROLE_LABELS = {
+  critical: '关键节点',
+  success:  '成功/完成',
+  danger:   '失败/风险',
+  info:     '重要处理',
+  muted:    '次要/跳过',
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // §8  导出
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1044,4 +1217,10 @@ export {
   cleanHardcodedColors,
   injectStylesToSVG,
   applyStylesToSVG,
+  // 语义角色
+  SEMANTIC_ROLE_COLORS,
+  SEMANTIC_ROLE_LABELS,
+  parseSemanticRoles,
+  applySemanticRoles,
+
 };

@@ -43,6 +43,8 @@ import {
   resolveTheme,
   getDarkThemes,
   getLightThemes,
+  parseSemanticRoles,
+  applySemanticRoles,
 } from './styles.js';
 
 // 本地主题别名（保持代码兼容）
@@ -408,6 +410,9 @@ async function renderSingleFile(inputPath, outputPath, options, lib) {
 
 // 渲染核心逻辑（从代码字符串到输出）
 async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, renderMermaidASCII, THEMES }) {
+  // 解析语义角色声明（在过滤注释之前，因为 @roles 在注释行里）
+  const roleMap = parseSemanticRoles(code);
+
   // 剥离 .mmd 文件中的顶部 # 注释行（rich-html.js 的元数据注释）
   // 格式: # @title / # @desc / # @icon / # @meta / # 普通注释
   // Mermaid 语法本身不支持 # 注释，这些行必须在渲染前移除
@@ -469,6 +474,8 @@ async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, r
     if (effectivePreset) {
       svgOutput = injectStylesToSVG(svgOutput, theme, effectivePreset);
     }
+    // 应用语义角色 class（在样式注入之后，确保 CSS 选择器能命中）
+    svgOutput = applySemanticRoles(svgOutput, roleMap);
 
     const scale = Math.max(0.5, Math.min(4, options.scale));
     const dpi = Math.max(72, Math.min(600, options.dpi));
@@ -490,6 +497,8 @@ async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, r
     if (effectivePreset) {
       output = injectStylesToSVG(output, theme, effectivePreset);
     }
+    // 应用语义角色 class（在样式注入之后，确保 CSS 选择器能命中）
+    output = applySemanticRoles(output, roleMap);
 
     fs.writeFileSync(outputPath, output);
     const presetInfo = effectivePreset ? ` + preset:${effectivePreset}` : '';

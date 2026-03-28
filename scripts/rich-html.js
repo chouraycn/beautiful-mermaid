@@ -71,6 +71,10 @@ import {
   isValidPreset,
   resolveTheme,
   getRecommendedPreset,
+  parseSemanticRoles,
+  applySemanticRoles,
+  SEMANTIC_ROLE_COLORS,
+  SEMANTIC_ROLE_LABELS,
 } from './styles.js';
 
 // 本地主题别名（保持代码兼容）
@@ -570,6 +574,7 @@ function parseMmdMeta(content, filename) {
     analysis: null,     // 分析归纳文字
     keyNodes: null,     // 关键业务节点
     priority: 999,     // 排序优先级（数字越小越靠前）
+    roles: null,        // 语义角色声明（@roles 注释）
   };
 
   const lines = content.split('\n');
@@ -597,8 +602,12 @@ function parseMmdMeta(content, filename) {
           return { label: pair.slice(0, idx).trim(), value: pair.slice(idx + 1).trim() };
         });
         break;
+      // roles 行通过 parseSemanticRoles 统一处理（见下方）
     }
   }
+
+  // 解析语义角色声明（# @roles critical:A,B success:C ...）
+  meta.roles = parseSemanticRoles(content);  // Map<nodeId, roleName>
 
   // 自动推断图表类型（从内容首行）
   const diagramType = meta.type
@@ -1290,6 +1299,52 @@ function buildStatsGrid(infoCards, accentColor, isLight) {
 /**
  * 构建每个图表卡片（大卡片）
  */
+/**
+ * 生成语义角色图例 HTML
+ * @param {Map<string,string>|null} roleMap   - nodeId → roleName（来自 meta.roles）
+ * @param {object}                 colors     - 主题颜色对象
+ * @param {boolean}                isLight    - 是否亮色主题
+ * @returns {string}  HTML 字符串，若无角色则返回空字符串
+ */
+function buildRoleLegend(roleMap, colors, isLight) {
+  if (!roleMap || roleMap.size === 0) return '';
+
+  // 统计各角色实际被使用的角色
+  const usedRoles = [...new Set(roleMap.values())];
+  if (usedRoles.length === 0) return '';
+
+  const tone = isLight ? 'light' : 'dark';
+
+  const items = usedRoles.map(role => {
+    const c = SEMANTIC_ROLE_COLORS[role]?.[tone];
+    if (!c) return '';
+    const label = SEMANTIC_ROLE_LABELS[role] || role;
+    const nodes = [...roleMap.entries()]
+      .filter(([, r]) => r === role)
+      .map(([id]) => id)
+      .join(', ');
+    return `
+      <div class="role-legend-item">
+        <span class="role-legend-swatch" style="background:${c.fill};border:1.5px solid ${c.stroke};"></span>
+        <span class="role-legend-label" style="color:${isLight ? colors.fg : '#ccc'};">${escHtml(label)}</span>
+        <span class="role-legend-nodes" style="color:${isLight ? colors.muted || colors.fg + '99' : '#888'};">${escHtml(nodes)}</span>
+      </div>`;
+  }).join('');
+
+  const bgColor = isLight
+    ? adjustBrightness(colors.bg, -6)
+    : adjustBrightness(colors.bg, 6);
+
+  return `
+    <div class="role-legend" style="background:${bgColor};border-top:1px solid ${isLight ? colors.border || '#e5e7eb' : '#333'};">
+      <span class="role-legend-title" style="color:${isLight ? colors.muted || '#888' : '#888'};">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        节点角色
+      </span>
+      ${items}
+    </div>`;
+}
+
 function buildDiagramCards(diagrams, colors, isLight) {
   return diagrams.map((d, i) => {
     const { meta, svgContent, mmdSource } = d;
@@ -1316,6 +1371,9 @@ function buildDiagramCards(diagrams, colors, isLight) {
     const flowSummaryHtml = buildFlowSummary(deepAnalysis, colors, isLight);
     const checks = selfCheck(deepAnalysis);
     const selfCheckHtml = buildSelfCheckPanel(checks, isLight);
+
+    // 语义角色图例（仅当有声明时显示）
+    const roleHtml = buildRoleLegend(meta.roles, colors, isLight);
 
     // 图表类型 badge 颜色（基于类型稳定哈希）
     const typeBadgeColors = {
@@ -1390,6 +1448,7 @@ function buildDiagramCards(diagrams, colors, isLight) {
         <div class="svg-render-inner" id="svg-container-${i}">${svgOrFallback}</div>
       </div>
 
+      ${roleHtml}
       ${flowSummaryHtml}
       ${selfCheckHtml}
 
@@ -1971,6 +2030,49 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
     @keyframes fadeInUp {
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* ─── Semantic Role Legend ──────────────────── */
+    .role-legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 16px;
+      padding: 10px 20px;
+      font-size: 11.5px;
+    }
+    .role-legend-title {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0.65;
+      flex-shrink: 0;
+    }
+    .role-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .role-legend-swatch {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .role-legend-label {
+      font-weight: 500;
+    }
+    .role-legend-nodes {
+      font-size: 10.5px;
+      font-family: ${STYLE_PRESETS.outline.font.family};
+      opacity: 0.7;
+    }
+    .role-legend-nodes::before { content: '('; }
+    .role-legend-nodes::after  { content: ')'; }
 
     /* ─── Diagram Card ──────────────────────────── */
     .diagram-card {
@@ -3232,6 +3334,8 @@ async function main() {
       const renderOptions = { ...resolvedTheme, interactive: false };
       let svg = renderMermaidSVG(renderCode, renderOptions);
       svg = injectStylesToSVG(svg, resolvedTheme, effectivePreset);
+      // 应用语义角色 class（必须在 injectStylesToSVG 之后，CSS 规则才能命中）
+      svg = applySemanticRoles(svg, meta.roles);
 
       // 移除 svg 的固定 width/height，让它能够响应式缩放
       svg = svg

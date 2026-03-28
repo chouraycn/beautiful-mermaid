@@ -152,6 +152,65 @@ node scripts/render.js assets/examples/xychart-bar.mmd --interactive -o chart-in
 | catppuccin-latte | 亮色 | Catppuccin Latte |
 | tokyo-night-light | 亮色 | 东京之夜·亮色 |
 
+## 语义角色（节点颜色语义化）
+
+不需要在 Mermaid 代码里写死 HEX 颜色，只需在 `.mmd` 文件顶部用 `# @roles` 注释声明节点的语义角色，渲染时会**自动根据主题亮暗**选择对应的颜色套装。
+
+### 用法
+
+```
+# @roles  角色名:节点ID,节点ID  角色名:节点ID  ...
+```
+
+多个角色空格分隔，同一角色的多个节点 ID 逗号分隔。
+
+### 可用角色
+
+| 角色 | 含义 | 亮色主题 | 暗色主题 |
+|------|------|---------|---------|
+| `critical` | 关键节点 / 触发入口 | `#FFF7ED` 橙底 `#F97316` 橙边 | `#431407` 深橙底 |
+| `success`  | 成功 / 完成 / 正向结果 | `#F0FDF4` 绿底 `#22C55E` 绿边 | `#052e16` 深绿底 |
+| `danger`   | 失败 / 降级 / 风险   | `#FEF2F2` 红底 `#EF4444` 红边 | `#450a0a` 深红底 |
+| `info`     | 重要处理 / 关键步骤  | `#EFF6FF` 蓝底 `#3B82F6` 蓝边 | `#172554` 深蓝底 |
+| `muted`    | 次要 / 跳过 / 禁用  | `#F4F4F5` 灰底 `#A1A1AA` 灰边 | `#27272A` 深灰底 |
+
+### 完整示例
+
+```mermaid
+# @title  秒杀预加载流程
+# @roles  critical:A  info:E,F  success:K,G  danger:H  muted:Z
+flowchart TD
+    A[距离开始 < 5分钟] --> B{用户在线?}
+    B -->|是| E[资源分类预加载]
+    B -->|否| Z[等待用户上线]
+    E --> F[CDN 预热]
+    F --> G[标记准备就绪]
+    G --> K[进入等待期]
+    F --> H{预热失败?}
+    H -->|是| Z
+    H -->|否| K
+```
+
+渲染命令：
+
+```bash
+node scripts/rich-html.js "秒杀流程" \
+  --diagrams preload.mmd \
+  --theme github-light --preset outline \
+  --output result.html
+```
+
+渲染后效果：
+- 节点 A 橙色（关键入口），切换 `tokyo-night` 等暗色主题时自动换为深橙
+- 节点 E、F 蓝色（重要处理步骤）
+- 节点 K、G 绿色（成功结果）
+- 节点 H 红色（失败路径）
+- 节点 Z 灰色（次要路径）
+
+**图例**：Rich HTML 卡片底部会自动出现「节点角色」图例条，无需手动维护。
+
+---
+
 ## 提示
 
 1. **交互式预览**：使用 `open assets/preview.html` 打开可视化样式定制工具
@@ -163,3 +222,4 @@ node scripts/render.js assets/examples/xychart-bar.mmd --interactive -o chart-in
 7. **样式预设**：5 种预设风格（默认、现代简约、渐变、线条轮廓、毛玻璃）
 8. **XY 图表**：使用 `xychart-beta` 语法，支持柱状图、折线图、组合图
 9. **交互式图表**：使用 `--interactive` 参数为 XY 图表添加鼠标悬停 tooltip
+10. **语义角色**：用 `# @roles critical:A success:B` 声明节点角色，颜色随主题自动切换，无需写死 HEX

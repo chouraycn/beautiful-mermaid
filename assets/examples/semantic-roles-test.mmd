@@ -1,0 +1,14 @@
+# @title  春季秒杀·预加载流程（语义角色演示）
+# @desc   演示 @roles 语义角色功能：critical/success/danger/info/muted
+# @icon   🎨
+# @roles  critical:A  info:E,F  success:K,G,E1  danger:H  muted:Z
+flowchart TD
+    A[距离秒杀开始 < 5分钟] --> B{当前用户在线?}
+    B -->|是| E[资源分类预加载]
+    B -->|否| Z[等待用户上线]
+    E --> F[CDN 预热 + 缓存]
+    F --> G[标记准备就绪]
+    G --> K[进入等待期]
+    F --> H{预热失败?}
+    H -->|是| E1[触发降级方案]
+    H -->|否| K
