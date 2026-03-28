@@ -181,11 +181,11 @@ Beautiful Mermaid CLI Renderer
 
 可用主题:
   github-light        GitHub 亮色 (默认)
+  tokyo-night          东京之夜
   tokyo-night-storm    东京之夜·暴风雨
   tokyo-night-light    东京之夜·亮色
   dracula             德古拉红
   github-dark         GitHub 暗色
-  github-light        GitHub 亮色
   nord                Nord 蓝
   nord-light         Nord 亮色
   one-dark            One Dark
@@ -195,6 +195,8 @@ Beautiful Mermaid CLI Renderer
   solarized-light     Solarized 亮色
   zinc-light          Zinc 亮色
   zinc-dark           Zinc 暗色
+  orange-dark         橙色暗调
+  orange-light        橙色亮调
 
 样式预设 (--preset):
   default     默认样式 (圆角8px, 边框2px, 阴影)
