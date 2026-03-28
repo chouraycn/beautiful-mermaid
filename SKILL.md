@@ -1217,6 +1217,9 @@ console.log(css);
 8. **CSS 变量主题切换**：传递 `var(--xxx)` 作为颜色值，SVG 可实时响应主题变化
 9. **XY 图表**：使用 `xychart-beta` 语法，`accent` 颜色驱动图表系列配色
 10. **linkStyle 支持**：流程图和状态图支持 `linkStyle` 内联边样式覆盖
+11. **语义角色 vs. style/classDef**：不要用 `style A fill:#xxx` 或 `classDef xxx fill:#yyy` 写死颜色——这些硬编码颜色会被 `cleanHardcodedColors()` 清除。应改用 `# @roles` 声明语义角色，颜色由主题自动决定
+12. **语义角色作用域**：`@roles` 仅对当前 `.mmd` 文件生效；节点 ID 区分大小写，须与 Mermaid 代码里的 ID 完全一致
+13. **SVG 输出的语义角色**：`render.js` 生成的 SVG 也支持语义角色着色（含 PNG 导出）；`rich-html.js` 额外显示图例条
 
 ## 相关链接
 
