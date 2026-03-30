@@ -19,7 +19,7 @@ _精简整合版，更新于 2026-03-30 13:20_
 | `scripts/test.js` | 40 个 smoke test |
 | `scripts/check-pkg.js` | 25 项包结构验证 |
 | `scripts/release.js` | 本地发布助手 |
-| `assets/examples/` | 9 个通用示例（flowchart-basic、sequence-diagram、state-diagram、class-diagram、er-diagram、system-architecture、xychart-bar、xychart-combo、xychart-line）|
+| `assets/examples/` | 10 个示例（含 semantic-roles-test.mmd）|
 | `assets/preview.html` | 浏览器交互式预览 |
 | `.workbuddy/last-render.json` | 记录最近一次渲染的 theme/preset，用于"继续"任务 |
 
@@ -55,6 +55,18 @@ _精简整合版，更新于 2026-03-30 13:20_
 - CI/CD：`.github/workflows/` 含 ci.yml / release.yml / version-check.yml
 - 发布命令：`npm run release:dry` 预检，`npm run release` 一键打 tag + 触发 CD
 - CodeBuddy 市场：未上架；OpenClaw ClawHub：未发布
+
+## 文件清理记录（2026-03-30）
+
+| 删除文件 | 原因 |
+|---------|------|
+| `assets/.DS_Store` | macOS 系统文件，已加入 .gitignore |
+| `.workbuddy/settings.local.json` | 本地开发设置，非必需 |
+| `assets/examples/sequence-diagram.svg` | 已删除的 SVG 输出文件（git status 显示） |
+| `assets/preview-test.html` | 测试文件，非必需 |
+| `assets/test-block.html` | 测试文件，非必需 |
+| `assets/test-block.mmd` | 测试文件，非必需 |
+| `assets/test-block.svg` | 测试文件，非必需 |
 
 ## 已修复 Bug 归档（2026-03-28 ~ 2026-03-30）
 
