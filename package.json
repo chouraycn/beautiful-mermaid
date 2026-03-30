@@ -10,11 +10,9 @@
     "render:png": "node scripts/render.js --format png",
     "render:html": "node scripts/render.js --format html",
     "render:batch": "node scripts/render.js --batch",
-    "render:batch-parallel": "node scripts/render.js --batch-parallel",
     "rich-html": "node scripts/rich-html.js",
     "test": "node scripts/test.js",
     "check:pkg": "node scripts/check-pkg.js",
-    "perf-test": "node scripts/perf-test.js",
     "release": "node scripts/release.js",
     "release:dry": "node scripts/release.js --dry-run"
   },

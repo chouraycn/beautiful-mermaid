@@ -446,7 +446,6 @@ git push origin feature/new-theme
 **任务清单**:
 - [ ] `preview.html` 添加「快速复制」按钮
 - [ ] `AI_GUIDELINES.md` 添加「快速模式」规则
-- [ ] 批量渲染并行化（Worker 线程）
 - [ ] 大型流程图内存优化（流式输出）
 - [ ] 错误提示增强（定位具体错误位置）
 - [ ] 添加 PDF 导出功能（`jsPDF`）
