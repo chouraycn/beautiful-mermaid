@@ -1,6 +1,6 @@
 ---
 name: beautiful-mermaid
-version: "1.1.3"
+version: "1.1.5"
 icon: beautiful-mermaid.png
 description: 将 Mermaid 图表渲染为美观的 SVG、PNG 或 ASCII 艺术字。支持流程图、序列图、状态图、类图、ER图、XY图表（含柱状图、折线图、组合图等）等6种核心图表类型，提供17个内置主题（15个上游+2个本地扩展）和自定义主题能力，支持CSS级样式定制和交互式预览。适用于在终端、聊天界面或网页中可视化数据流、系统架构、状态机等。
 description_zh: 将 Mermaid 图表渲染为美观的 SVG、PNG 或 ASCII 艺术字
