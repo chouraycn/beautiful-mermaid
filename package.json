@@ -8,6 +8,7 @@
     "render:svg": "node scripts/render.js --format svg",
     "render:ascii": "node scripts/render.js --format ascii",
     "render:png": "node scripts/render.js --format png",
+    "render:html": "node scripts/render.js --format html",
     "rich-html": "node scripts/rich-html.js",
     "test": "node scripts/test.js",
     "check:pkg": "node scripts/check-pkg.js",
@@ -36,8 +37,8 @@
   ],
   "license": "MIT-0",
   "author": {
-    "name": "CodeBuddy",
-    "url": "https://codebuddy.ai"
+    "name": "chouray",
+    "url": "https://github.com/chouraycn"
   },
   "engines": {
     "node": ">=16.0.0"

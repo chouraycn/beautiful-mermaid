@@ -39,6 +39,14 @@ _精简整合版，更新于 2026-03-30 13:20_
 | 补充 `--format html` | 参数表 + CLI 示例均已补全 `html` 格式支持 |
 | 主题数量统一 | 参数优先级说明"15主题"改为"17主题"，与文档其他部分保持一致 |
 
+## CI/CD 修复记录（2026-03-30）
+
+| 修复项 | 详情 |
+|--------|------|
+| `release.yml` release notes | "3 种输出格式" → "4 种"，补充 HTML |
+| `package.json` scripts | 新增 `render:html` shortcut，与 svg/ascii/png 一致 |
+| `package.json` author | `CodeBuddy / codebuddy.ai` → `chouray / github.com/chouraycn` |
+
 ## 发布状态（2026-03-30）
 
 - 版本：v1.1.5（package.json + SKILL.md 一致）

@@ -87,7 +87,7 @@ jobs:
           - **${THEME_COUNT} 内置主题**：tokyo-night、dracula、github-dark、nord 等
           - **5 种样式预设**：default、modern、gradient、outline、glass
           - **6 种图表类型**：流程图、序列图、状态图、类图、ER图、XY图表
-          - **3 种输出格式**：SVG、PNG、ASCII
+          - **4 种输出格式**：SVG、PNG、HTML、ASCII
           - 交互式预览工具（assets/preview.html）
           - 多图表聚合 HTML 生成（rich-html.js）
 
