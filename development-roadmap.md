@@ -507,7 +507,7 @@ git push origin feature/new-theme
 
 **立即执行（本周）**:
 1. 在 `preview.html` 添加「快速复制」按钮
-2. 在 `AI_GUIDELINES.md` 添加「快速模式」规则
+2. 在 `SKILL.md` AI 工作流程指南添加「快速模式」规则
 
 **近期规划（本月）**:
 3. 批量渲染并行化（Worker 线程）
