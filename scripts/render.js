@@ -7,6 +7,7 @@
  *   node scripts/render.js <input.mmd> [options]
  *   node scripts/render.js --code "graph TD\nA --> B" [options]
  *   node scripts/render.js --batch <dir> [options]
+ *   node scripts/render.js --batch-parallel <dir> [options]  # 并行批量渲染
  * 
  * 选项:
  *   --format, -f     输出格式: svg (默认) | ascii | png | html
@@ -22,6 +23,8 @@
  *   --dpi            PNG 输出 DPI (默认: 144, 范围: 72-600)
  *   --interactive    启用交互式 tooltip (仅 XY 图表)
  *   --batch          批量模式: 渲染目录下所有 .mmd 文件
+ *   --batch-parallel 并行批量模式: 使用Worker线程并行渲染
+ *   --workers, -w    Worker并发数 (默认: CPU核心数-1)
  *   --color-mode     ASCII 颜色模式: none | auto | ansi16 | ansi256 | truecolor (默认) | html
  *   --help, -h       显示帮助
  */
@@ -46,6 +49,15 @@ import {
   parseSemanticRoles,
   applySemanticRoles,
 } from './styles.js';
+
+// 批量并行渲染支持
+let batchRenderModule = null;
+async function loadBatchRender() {
+  if (!batchRenderModule) {
+    batchRenderModule = await import('./batch-render.js');
+  }
+  return batchRenderModule;
+}
 
 // 本地主题别名（保持代码兼容）
 const LOCAL_THEMES = THEMES;
@@ -109,6 +121,8 @@ function parseArgs() {
     interactive: false,
     colorMode: 'truecolor',
     batch: false,
+    batchParallel: false,
+    workers: null,
     input: null
   };
 
@@ -163,6 +177,13 @@ function parseArgs() {
         break;
       case '--batch':
         options.batch = true;
+        break;
+      case '--batch-parallel':
+        options.batchParallel = true;
+        break;
+      case '--workers':
+      case '-w':
+        options.workers = parseInt(args[++i], 10);
         break;
       case '--list-themes':
         options.listThemes = true;
@@ -306,7 +327,28 @@ async function main() {
   // 动态导入 beautiful-mermaid (ESM)
   const { renderMermaidSVG, renderMermaidASCII, THEMES } = await import('beautiful-mermaid');
 
-  // 批量模式
+  // 批量并行模式
+  if (options.batchParallel) {
+    if (!options.input) {
+      console.error('错误: --batch-parallel 模式需要指定目录路径');
+      showHelp();
+      process.exit(1);
+    }
+    if (!fs.existsSync(options.input)) {
+      console.error(`错误: 目录不存在 ${options.input}`);
+      process.exit(1);
+    }
+    const stat = fs.statSync(options.input);
+    if (!stat.isDirectory()) {
+      console.error(`错误: ${options.input} 不是目录`);
+      process.exit(1);
+    }
+
+    await renderBatchParallel(options);
+    return;
+  }
+
+  // 批量模式（单线程）
   if (options.batch) {
     if (!options.input) {
       console.error('错误: --batch 模式需要指定目录路径');
@@ -519,6 +561,127 @@ async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, r
     console.log(`✓ SVG 已保存: ${outputPath}${presetInfo}`);
     saveRenderState(options, theme, effectivePreset, outputPath);
   }
+}
+
+/**
+ * 批量并行渲染（Worker线程）
+ * 使用Worker线程池并行渲染多个图表，显著提升性能
+ */
+async function renderBatchParallel(options) {
+  const { renderMermaidSVG, renderMermaidASCII } = await import('beautiful-mermaid');
+  const batchRender = await loadBatchRender();
+
+  // 收集 .mmd 文件
+  const mmdFiles = fs.readdirSync(options.input)
+    .filter(f => f.endsWith('.mmd'))
+    .sort();
+
+  if (mmdFiles.length === 0) {
+    console.error('错误: 目录中没有 .mmd 文件');
+    process.exit(1);
+  }
+
+  // 确定输出目录
+  const outputDir = options.output || options.input;
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  const ext = options.format === 'ascii' ? 'txt' : options.format === 'png' ? 'png' : 'svg';
+
+  // 读取所有文件内容
+  const diagrams = mmdFiles.map(file => {
+    return fs.readFileSync(path.join(options.input, file), 'utf-8');
+  });
+
+  // 确定Worker并发数
+  const concurrency = options.workers || batchRender.DEFAULT_CONCURRENCY;
+
+  // 性能预测
+  const perfEst = batchRender.estimatePerformance(diagrams.length, concurrency);
+  console.log(`⚡ 批量并行渲染: ${mmdFiles.length} 个文件`);
+  console.log(`   输出目录: ${outputDir}/ (${options.format})`);
+  console.log(`   Worker并发: ${concurrency}`);
+  console.log(`   预计耗时: ${(perfEst.estimatedTime / 1000).toFixed(2)}s (提速 ${perfEst.speedup}x)\n`);
+
+  // 准备Mermaid配置
+  const mermaidConfig = {
+    theme: options.theme,
+    startOnLoad: false
+  };
+
+  // 执行并行渲染
+  console.time('Rendering');
+  const startTime = Date.now();
+
+  const results = await batchRender.renderBatch(diagrams, mermaidConfig, {
+    concurrency,
+    onProgress: (completed, total) => {
+      const percent = ((completed / total) * 100).toFixed(1);
+      process.stdout.write(`\r   进度: ${completed}/${total} (${percent}%)`);
+    }
+  });
+
+  const renderTime = Date.now() - startTime;
+  console.timeEnd('Rendering');
+
+  // 处理渲染结果（应用样式、转换格式、保存文件）
+  let success = 0;
+  let failed = 0;
+
+  console.log(`\n\n处理结果...`);
+
+  for (let i = 0; i < results.length; i++) {
+    const file = mmdFiles[i];
+    const baseName = file.replace(/\.mmd$/, '');
+    const outputPath = path.join(outputDir, `${baseName}.${ext}`);
+    const result = results[i];
+
+    try {
+      if (result instanceof Error) {
+        throw result;
+      }
+
+      // 应用样式主题
+      const theme = resolveTheme(options.theme, LOCAL_THEMES);
+      const styledSvg = injectStylesToSVG(result, theme, options.preset);
+
+      // 格式转换
+      if (options.format === 'png') {
+        const sharp = await loadSharp();
+        const metadata = await sharp(Buffer.from(styledSvg)).metadata();
+        const scale = options.scale || 1;
+        const width = options.width || Math.floor((metadata.width || 1200) * scale);
+
+        await sharp(Buffer.from(styledSvg))
+          .resize({ width })
+          .png()
+          .toFile(outputPath);
+      } else if (options.format === 'ascii') {
+        const ascii = renderMermaidASCII(styledSvg, {
+          bg: options.bg,
+          fg: options.fg,
+          line: options.line,
+          colorMode: options.colorMode
+        });
+        fs.writeFileSync(outputPath, ascii);
+      } else {
+        // SVG 或 HTML
+        fs.writeFileSync(outputPath, styledSvg);
+      }
+
+      success++;
+    } catch (e) {
+      failed++;
+      console.error(`  ✗ ${file}: ${e.message}`);
+    }
+  }
+
+  // 最终统计
+  const actualSpeedup = (perfEst.singleThreadTime / renderTime).toFixed(2);
+  console.log(`\n✅ 完成: ${success} 成功, ${failed} 失败`);
+  console.log(`   实际耗时: ${(renderTime / 1000).toFixed(2)}s`);
+  console.log(`   性能提升: ${actualSpeedup}x\n`);
 }
 
 main();
