@@ -9,7 +9,7 @@
  *   node scripts/render.js --batch <dir> [options]
  * 
  * 选项:
- *   --format, -f     输出格式: svg (默认) | ascii | png
+ *   --format, -f     输出格式: svg (默认) | ascii | png | html
  *   --theme, -t      主题名称或自定义主题JSON
  *   --output, -o     输出文件路径
  *   --code, -c       直接传入 Mermaid 代码
@@ -490,6 +490,20 @@ async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, r
     const presetInfo = effectivePreset ? `, preset:${effectivePreset}` : '';
     console.log(`✓ PNG 已保存: ${outputPath} (${outputWidth}px, scale:${scale}, dpi:${dpi}${presetInfo})`);
     saveRenderState(options, theme, effectivePreset, outputPath);
+  } else if (options.format === 'html') {
+    // HTML 格式：直接调用 rich-html.js 生成（不单独生成 SVG）
+    const { execSync } = await import('child_process');
+    const title = path.basename(options.input || 'Diagram', '.mmd');
+    const themeArg = typeof options.theme === 'string' ? options.theme : 'github-light';
+    const richHtmlCmd = `node scripts/rich-html.js "${title}" --diagrams "${options.input}" --theme "${themeArg}" ${effectivePreset ? `--preset ${effectivePreset}` : ''} --output "${outputPath}"`;
+
+    try {
+      execSync(richHtmlCmd, { cwd: process.cwd(), stdio: 'inherit' });
+      console.log(`✓ HTML 已保存: ${outputPath}`);
+      saveRenderState(options, theme, effectivePreset, outputPath);
+    } catch (err) {
+      console.error(`生成 HTML 失败: ${err.message}`);
+    }
   } else {
     const renderOptions = { ...theme, interactive: options.interactive };
     let output = renderMermaidSVG(code, renderOptions);
