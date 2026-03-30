@@ -1,0 +1,241 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 360" width="560" height="360" style="--bg:#FFFFFF;--fg:#27272A;--line:#A1A1AA;--accent:#3F3F46;--muted:#71717A;--surface:#F4F4F5;--border:#D4D4D8;--_line:#A1A1AA;--_arrow:#A1A1AA;--_text:#27272A;--_text-sec:#71717A;--_text-muted:#71717A;--_node-fill:#FFFFFF;--_node-stroke:#71717A;--_group-fill:#3F3F4618;--_group-hdr:#3F3F46;--_inner-stroke:#71717A" id="bm-diagram-1">
+<style>
+#bm-diagram-1 {
+  /* 覆盖 CSS 变量 */
+  --_text:       #27272A       !important;
+  --_text-sec:   #71717A !important;
+  --_line:       #A1A1AA      !important;
+  --_arrow:      #A1A1AA      !important;
+  --_node-fill:  #FFFFFF       !important;
+  --_node-stroke:#71717A    !important;
+  --_group-fill: #3F3F4618 !important;
+  --_group-hdr:  #3F3F46 !important;
+}
+#bm-diagram-1 text {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace !important;
+  font-size:   13px !important;
+  dominant-baseline: central;
+  dy: 0.35em;
+}
+/* ── 节点形状：类选择器 + 通用元素选择器双保险，确保无论 cleanHardcodedColors 是否删除 fill 属性都能生效 ── */
+/* 排除 .block 内的矩形（时序图 loop/alt/opt/rect 块），避免覆盖其专属样式 */
+#bm-diagram-1 .node rect,
+#bm-diagram-1 .node circle,
+#bm-diagram-1 .node ellipse,
+#bm-diagram-1 .node polygon,
+#bm-diagram-1 .node path,
+#bm-diagram-1 rect,
+#bm-diagram-1 circle,
+#bm-diagram-1 ellipse {
+  fill:         #FFFFFF        !important;
+  stroke:       #71717A     !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 0px 0px transparent) !important;
+}
+/* ── 时序图 block（loop/alt/opt）矩形：覆盖通用 rect 规则 ── */
+/* 外边框矩形（block 内第一个 rect）：fill none，只有描边 */
+#bm-diagram-1 .block > rect:first-of-type {
+  fill:         none !important;
+  stroke:       #71717A !important;
+  stroke-width: 1px !important;
+  filter:       none !important;
+}
+/* header tab 矩形（block 内第二个 rect，即 rect + rect）：accent 半透明填充 */
+#bm-diagram-1 .block > rect:nth-of-type(2) {
+  fill:         #3F3F4630 !important;
+  stroke:       #71717A !important;
+  stroke-width: 1px !important;
+  filter:       none !important;
+}
+/* seq-rect-bg：rect rgb(...) 纯背景色块，不加描边，不加阴影 */
+#bm-diagram-1 .seq-rect-bg {
+  stroke:       none !important;
+  stroke-width: 0 !important;
+  filter:       none !important;
+}
+#bm-diagram-1 .node rect {
+  rx: 4px !important;
+  ry: 4px !important;
+}
+/* 菱形/多边形节点 */
+#bm-diagram-1 .node polygon {
+  fill:   #FFFFFF     !important;
+  stroke: #71717A  !important;
+  stroke-width: 2px !important;
+}
+/* 节点文字 */
+#bm-diagram-1 g.node text,
+#bm-diagram-1 .label text,
+#bm-diagram-1 .nodeLabel {
+  fill: #27272A !important;
+}
+/* 子图/cluster 标题 */
+#bm-diagram-1 .cluster-label text {
+  fill:        #3F3F46 !important;
+  font-size:   12px !important;
+  font-weight: 600 !important;
+}
+/* cluster 容器 */
+#bm-diagram-1 .cluster rect {
+  fill:   #3F3F4618 !important;
+  stroke: #71717A !important;
+  stroke-width: 1px !important;
+  filter: none !important;
+}
+/* 边/连线：只选连线相关路径，不影响节点内部形状 */
+#bm-diagram-1 .edge path,
+#bm-diagram-1 .edgePath path,
+#bm-diagram-1 .edgePath .path {
+  fill:         none          !important;
+  stroke:       #A1A1AA  !important;
+  stroke-width: 2px !important;
+}
+/* 连线（line 元素） */
+#bm-diagram-1 .edge line,
+#bm-diagram-1 .flowchart-link {
+  stroke:       #A1A1AA  !important;
+  stroke-width: 2px !important;
+}
+/* 箭头：marker 内的多边形/路径专属 */
+#bm-diagram-1 marker polygon,
+#bm-diagram-1 marker path,
+#bm-diagram-1 .arrowhead polygon,
+#bm-diagram-1 .arrowhead path {
+  stroke: #A1A1AA !important;
+  fill:   #A1A1AA !important;
+  filter: none !important;
+}
+/* 边标签 */
+#bm-diagram-1 .edgeLabel text,
+#bm-diagram-1 .edgeLabel {
+  fill:      #71717A !important;
+  font-size: 11px  !important;
+}
+/* ── Semantic Role Colors ── */
+#bm-diagram-1 .bm-critical rect,
+#bm-diagram-1 .bm-critical circle,
+#bm-diagram-1 .bm-critical ellipse,
+#bm-diagram-1 .bm-critical polygon {
+  fill:   #FFF7ED   !important;
+  stroke: #F97316 !important;
+  stroke-width: 2px   !important;
+}
+#bm-diagram-1 .bm-critical text {
+  fill: #9A3412 !important;
+}
+#bm-diagram-1 .bm-success rect,
+#bm-diagram-1 .bm-success circle,
+#bm-diagram-1 .bm-success ellipse,
+#bm-diagram-1 .bm-success polygon {
+  fill:   #F0FDF4   !important;
+  stroke: #22C55E !important;
+  stroke-width: 2px   !important;
+}
+#bm-diagram-1 .bm-success text {
+  fill: #166534 !important;
+}
+#bm-diagram-1 .bm-danger rect,
+#bm-diagram-1 .bm-danger circle,
+#bm-diagram-1 .bm-danger ellipse,
+#bm-diagram-1 .bm-danger polygon {
+  fill:   #FEF2F2   !important;
+  stroke: #EF4444 !important;
+  stroke-width: 2px   !important;
+}
+#bm-diagram-1 .bm-danger text {
+  fill: #991B1B !important;
+}
+#bm-diagram-1 .bm-info rect,
+#bm-diagram-1 .bm-info circle,
+#bm-diagram-1 .bm-info ellipse,
+#bm-diagram-1 .bm-info polygon {
+  fill:   #EFF6FF   !important;
+  stroke: #3B82F6 !important;
+  stroke-width: 2px   !important;
+}
+#bm-diagram-1 .bm-info text {
+  fill: #1D4ED8 !important;
+}
+#bm-diagram-1 .bm-muted rect,
+#bm-diagram-1 .bm-muted circle,
+#bm-diagram-1 .bm-muted ellipse,
+#bm-diagram-1 .bm-muted polygon {
+  fill:   #F4F4F5   !important;
+  stroke: #A1A1AA !important;
+  stroke-width: 2px   !important;
+}
+#bm-diagram-1 .bm-muted text {
+  fill: #52525B !important;
+}</style>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line class="lifeline" data-actor="User" x1="70" y1="70" x2="70" y2="330" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="Client" x1="210" y1="70" x2="210" y2="330" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="API" x1="350" y1="70" x2="350" y2="330" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="DB" x1="490" y1="70" x2="490" y2="330" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="User" data-to="Client" data-label="提交请求" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="70" y1="90" x2="210" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="140" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">提交请求</text>
+</g>
+<g class="message" data-from="Client" data-to="API" data-label="发送数据" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="210" y1="130" x2="350" y2="130" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="280" y="120" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">发送数据</text>
+</g>
+<g class="message" data-from="API" data-to="DB" data-label="查询数据" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="350" y1="170" x2="490" y2="170" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="420" y="160" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">查询数据</text>
+</g>
+<g class="message" data-from="DB" data-to="API" data-label="返回结果" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="490" y1="210" x2="350" y2="210" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="420" y="200" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">返回结果</text>
+</g>
+<g class="message" data-from="API" data-to="Client" data-label="处理完成" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="350" y1="250" x2="210" y2="250" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="280" y="240" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">处理完成</text>
+</g>
+<g class="message" data-from="Client" data-to="User" data-label="显示结果" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="210" y1="290" x2="70" y2="290" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="140" y="280" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">显示结果</text>
+</g>
+<g class="actor" data-id="User" data-label="用户" data-type="participant">
+  <rect x="30" y="30" width="80" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="70" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">用户</text>
+</g>
+<g class="actor" data-id="Client" data-label="客户端" data-type="participant">
+  <rect x="170" y="30" width="80" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="210" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">客户端</text>
+</g>
+<g class="actor" data-id="API" data-label="API服务" data-type="participant">
+  <rect x="307.831" y="30" width="84.338" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="350" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">API服务</text>
+</g>
+<g class="actor" data-id="DB" data-label="数据库" data-type="participant">
+  <rect x="450" y="30" width="80" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="490" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">数据库</text>
+</g>
+</svg>

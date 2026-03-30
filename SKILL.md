@@ -42,7 +42,6 @@ triggers:
   - 画图
   - 绘图
   - 绘制图表
-  - 用户旅程图
   - 产品流程图
   - 业务流程图
   - 客户流程
@@ -476,6 +475,9 @@ node scripts/render.js diagram.mmd -f png --dpi 300 -o output.png
 # 渲染为 ASCII (终端)
 node scripts/render.js diagram.mmd -f ascii
 
+# 渲染为内嵌 SVG 的 HTML 页面
+node scripts/render.js diagram.mmd -f html -t tokyo-night -p glass -o output.html
+
 # XY 图表启用交互式 tooltip
 node scripts/render.js chart.mmd --interactive -o chart.svg
 
@@ -487,7 +489,7 @@ node scripts/render.js -c "graph TD\nA --> B" -o output.svg
 
 | 参数 | 说明 |
 |------|------|
-| `--format`, `-f` | 输出格式: `svg` (默认) \| `ascii` \| `png` |
+| `--format`, `-f` | 输出格式: `svg` (默认) \| `ascii` \| `png` \| `html` |
 | `--theme`, `-t` | 主题名称: tokyo-night, dracula, nord 等 17 个，或自定义 JSON |
 | `--output`, `-o` | 输出文件路径（批量模式为输出目录） |
 | `--code`, `-c` | 直接传入 Mermaid 代码 |
@@ -630,7 +632,7 @@ node scripts/render.js --list-themes
 ### 参数优先级
 
 1. `--bg` + `--fg` → 自定义基础配色（line/accent/muted 自动推导）
-2. `--theme` 名称 → 从内置 15 主题取完整 7 字段配色
+2. `--theme` 名称 → 从内置 17 主题取完整 7 字段配色
 3. `--theme` JSON → 直接使用 JSON 对象（缺省字段自动补全）
 4. `--preset` → 应用形状预设（与任何颜色来源都可以搭配）
 5. 自动推荐预设 → 不传 `--preset` 时，自动使用主题推荐的预设

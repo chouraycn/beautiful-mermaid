@@ -540,7 +540,22 @@ ${root} text {
   dominant-baseline: central;
   dy: ${TEXT_BASELINE_SHIFT};
 }
+/* ── 类图/ER图标题文字：覆盖内联 dy，实现真正的垂直居中 ── */
+/* 类图类名、ER图实体名使用 renderMultilineText 渲染，内联 dy 与 font-size 相关，
+   但某些字体下 central 基线对中文不准确，改用 middle + 动态 dy 计算 */
+${root} .class-node text,
+${root} .entity text {
+  dy: 0.35em !important;
+}
+/* 类图/ER图标题使用 middle 基线，对中文字体更友好 */
+${root} .class-node > text:first-of-type,
+${root} .class-node text[text-anchor="middle"],
+${root} .entity > text:first-of-type,
+${root} .entity text[text-anchor="middle"] {
+  dominant-baseline: middle !important;
+}
 /* ── 节点形状：类选择器 + 通用元素选择器双保险，确保无论 cleanHardcodedColors 是否删除 fill 属性都能生效 ── */
+/* 排除 .block 内的矩形（时序图 loop/alt/opt/rect 块），避免覆盖其专属样式 */
 ${root} .node rect,
 ${root} .node circle,
 ${root} .node ellipse,
@@ -553,6 +568,31 @@ ${root} ellipse {
   stroke:       ${borderColor}     !important;
   stroke-width: ${p.node.borderWidth}px !important;
   filter: drop-shadow(0 ${p.node.shadowBlur / 2}px ${p.node.shadowBlur}px ${p.node.shadowColor}) !important;
+}
+/* ── 时序图 block（loop/alt/opt）矩形：覆盖通用 rect 规则 ── */
+/* 外边框矩形（block 内第一个 rect）：fill none，只有描边 */
+${root} .block > rect:first-of-type {
+  fill:         none !important;
+  stroke:       ${borderColor} !important;
+  stroke-width: 1px !important;
+  filter:       none !important;
+}
+/* header tab 矩形（block 内第二个 rect，即 rect + rect）：accent 半透明填充 */
+${root} .block > rect:nth-of-type(2) {
+  fill:         ${theme.accent ? theme.accent + '30' : theme.fg + '18'} !important;
+  stroke:       ${borderColor} !important;
+  stroke-width: 1px !important;
+  filter:       none !important;
+}
+/* 时序图 block（loop/alt/opt）文字：10px */
+${root} .block text {
+  font-size: 10px !important;
+}
+/* seq-rect-bg：rect rgb(...) 纯背景色块，不加描边，不加阴影 */
+${root} .seq-rect-bg {
+  stroke:       none !important;
+  stroke-width: 0 !important;
+  filter:       none !important;
 }
 ${root} .node rect {
   rx: ${p.node.borderRadius}px !important;
@@ -703,6 +743,13 @@ function cleanHardcodedColors(svgString) {
     return cleanedStyle ? `style="${cleanedStyle}"` : '';
   });
 
+  // 4. 清理 text 元素的 dy 属性，让 CSS 完全控制垂直居中
+  // 问题：Mermaid 使用 renderMultilineText 渲染文字时生成内联 dy（如 dy="4.55"），
+  // 这个值在不同字体下可能不准确，且 CSS 的 dy 无法覆盖内联属性。
+  // 解决：删除内联的 dy 属性，让 CSS 规则生效。
+  // 注意：使用更精确的正则匹配 text 标签的 dy 属性，避免误删其他属性的 dy
+  cleaned = cleaned.replace(/(<text[^>]*)\s+dy="[^"]*"/g, '$1');
+
   return cleaned;
 }
 
@@ -839,6 +886,21 @@ function injectStylesToSVG(svgString, theme, preset = 'default', svgId = null) {
   // 问题：Mermaid 代码中的硬编码颜色（如 style A fill:#4F46E5）会直接写入 SVG 的 fill 属性
   // 覆盖 CSS 变量，导致节点不继承主题色。必须清理这些硬编码属性。
   fixed = cleanHardcodedColors(fixed);
+
+  // ── Step 2.5：还原时序图 rect 块的背景色 ──
+  // renderBlock 对 `rect` 类型生成 <rect class="seq-rect-bg" data-bm-color="rgb(...)">
+  // cleanHardcodedColors 会清掉 fill 属性，但 data-bm-color 保留了原始颜色。
+  // 此步骤把 data-bm-color 的值以 style="fill:..." 的形式写回，确保背景色显示正确。
+  fixed = fixed.replace(
+    /<rect\s[^>]*class="seq-rect-bg"[^>]*\/>/g,
+    (tag) => {
+      const colorMatch = tag.match(/data-bm-color="([^"]*)"/);
+      if (!colorMatch) return tag;
+      const color = colorMatch[1];
+      // 在自闭合 /> 之前插入 style 属性
+      return tag.replace(/\s*\/>$/, ` style="fill:${color}" />`);
+    }
+  );
 
   // ── Step 3：在 <svg> 开标签之后注入样式 ──
   const svgOpenEnd = fixed.indexOf('>');
