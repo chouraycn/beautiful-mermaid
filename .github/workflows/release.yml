@@ -71,12 +71,7 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           ZIP_NAME="${{ steps.build.outputs.zip_name }}"
           ZIP_SIZE="${{ steps.build.outputs.zip_size }}"
-          THEME_COUNT=$(node -e "
-  const fs = require('fs');
-  const content = fs.readFileSync('scripts/styles.js', 'utf-8');
-  const matches = content.match(/'[a-z-]+':\\s*\\{/g);
-  console.log(matches ? matches.length : 17);
-" 2>/dev/null || echo "17")
+          THEME_COUNT=$(node -e "const fs=require('fs');const c=fs.readFileSync('scripts/styles.js','utf-8');const m=c.match(/'[a-z-]+':\\s*\\{/g);console.log(m?m.length:17)" 2>/dev/null || echo "17")
 
           cat > release_notes.md << EOF
           ## Beautiful Mermaid Skill v${VERSION}
