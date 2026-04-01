@@ -672,16 +672,17 @@ function _generateSemanticRoleCSS(root, theme) {
 
   for (const [role, colors] of Object.entries(SEMANTIC_ROLE_COLORS)) {
     const c = colors[tone];
+    // 使用双类选择器（.bm-ROLE.node）提升特异性，确保覆盖通用 .node rect 规则
     parts.push(
-      `${root} .bm-${role} rect,`,
-      `${root} .bm-${role} circle,`,
-      `${root} .bm-${role} ellipse,`,
-      `${root} .bm-${role} polygon {`,
+      `${root} .bm-${role}.node rect,`,
+      `${root} .bm-${role}.node circle,`,
+      `${root} .bm-${role}.node ellipse,`,
+      `${root} .bm-${role}.node polygon {`,
       `  fill:   ${c.fill}   !important;`,
       `  stroke: ${c.stroke} !important;`,
       `  stroke-width: 2px   !important;`,
       `}`,
-      `${root} .bm-${role} text {`,
+      `${root} .bm-${role}.node text {`,
       `  fill: ${c.text} !important;`,
       `}`,
     );
@@ -1191,15 +1192,42 @@ function parseSemanticRoles(mmdContent) {
  * 对于每个 `<g class="node" data-id="XXX"` 标签，
  * 若 XXX 存在于 roleMap，则在 class 属性中追加 `bm-ROLE`。
  *
+ * 支持跨行 `<g>` 标签（Mermaid 渲染的 data-label 可能包含换行）。
+ *
  * @param {string}             svgString  - 已渲染并注入主题样式的 SVG 字符串
  * @param {Map<string, string>} roleMap   - nodeId → roleName
+ * @param {{ warn?: (msg: string) => void }} [logger] - 可选日志回调，用于输出未匹配警告
  * @returns {string}  注入 class 后的 SVG 字符串
  */
-function applySemanticRoles(svgString, roleMap) {
+function applySemanticRoles(svgString, roleMap, logger) {
   if (!roleMap || roleMap.size === 0) return svgString;
 
+  // 先从 SVG 中提取所有实际存在的节点 ID，用于警告未匹配的声明
+  const svgNodeIds = new Set();
+  const allGRegex = /<g[^>]*?data-id="([^"]+)"[^>]*?>/gs;
+  let idMatch;
+  while ((idMatch = allGRegex.exec(svgString)) !== null) {
+    svgNodeIds.add(idMatch[1]);
+  }
+
+  // 检查 roleMap 中有哪些 ID 在 SVG 中不存在
+  const unmatchedIds = [];
+  for (const declaredId of roleMap.keys()) {
+    if (!svgNodeIds.has(declaredId)) {
+      unmatchedIds.push(declaredId);
+    }
+  }
+  if (unmatchedIds.length > 0 && logger?.warn) {
+    logger.warn(
+      `@roles 声明的以下节点 ID 在图表中未找到: ${unmatchedIds.join(', ')}。` +
+      `请确认节点 ID 与 Mermaid 代码中的定义一致。` +
+      `当前图表中的节点 ID: ${[...svgNodeIds].slice(0, 10).join(', ')}${svgNodeIds.size > 10 ? '...' : ''}`
+    );
+  }
+
+  // 使用 [^]（或 [\s\S]）代替 . 以支持跨行匹配
   return svgString.replace(
-    /<g([^>]*?)data-id="([^"]+)"([^>]*?)>/g,
+    /<g([\s\S]*?)data-id="([^"]+)"([\s\S]*?)>/g,
     (match, before, nodeId, after) => {
       const role = roleMap.get(nodeId);
       if (!role) return match;

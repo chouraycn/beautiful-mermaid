@@ -475,7 +475,7 @@ async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, r
       svgOutput = injectStylesToSVG(svgOutput, theme, effectivePreset);
     }
     // 应用语义角色 class（在样式注入之后，确保 CSS 选择器能命中）
-    svgOutput = applySemanticRoles(svgOutput, roleMap);
+    svgOutput = applySemanticRoles(svgOutput, roleMap, { warn: msg => console.warn(`⚠ ${msg}`) });
 
     const scale = Math.max(0.5, Math.min(4, options.scale));
     const dpi = Math.max(72, Math.min(600, options.dpi));
@@ -512,7 +512,7 @@ async function renderSingleCode(code, outputPath, options, { renderMermaidSVG, r
       output = injectStylesToSVG(output, theme, effectivePreset);
     }
     // 应用语义角色 class（在样式注入之后，确保 CSS 选择器能命中）
-    output = applySemanticRoles(output, roleMap);
+    output = applySemanticRoles(output, roleMap, { warn: msg => console.warn(`⚠ ${msg}`) });
 
     fs.writeFileSync(outputPath, output);
     const presetInfo = effectivePreset ? ` + preset:${effectivePreset}` : '';

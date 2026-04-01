@@ -1,0 +1,2568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>电商平台整合流程图 — Beautiful Mermaid</title>
+  <style>
+    /* ─── Skip Link (WCAG 2.4.1) ────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -999px;
+      left: 16px;
+      z-index: 9999;
+      padding: 8px 18px;
+      background: var(--accent, #7aa2f7);
+      color: #fff;
+      border-radius: 0 0 8px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: top 0.15s;
+    }
+    .skip-link:focus { top: 0; outline: none; }
+  </style>
+  <style>
+    /* ─── CSS 变量 ──────────────────────────────── */
+    :root {
+      --bg:         #FFFFFF;
+      --surface:    #F4F4F5;
+      --border:     #D4D4D8;
+      --fg:         #27272A;
+      --muted:      #71717A;
+      --accent:     #3F3F46;
+      --accent-a:   rgba(63,63,70,0.15);
+      --accent-ah:  rgba(63,63,70,0.25);
+      --heading:    #131316;
+      --header-bg:  #fbfbfb;
+      --sidebar-bg: #f9f9f9;
+      --card-bg:    #FFFFFF;
+      --svg-area:   #f7f7f7;
+      --code-bg:    #f3f3f3;
+      --sidebar-w:  268px;
+      --header-h:   60px;
+      --radius-card: 16px;
+      --radius-sm:   8px;
+      --transition:  0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ─── Reset ────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ─── Subtle background texture ────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: radial-gradient(
+        circle at 20% 50%,
+        rgba(63,63,70,0.15) 0%,
+        transparent 60%
+      ), radial-gradient(
+        circle at 80% 20%,
+        rgba(63,63,70,0.15) 0%,
+        transparent 50%
+      );
+      opacity: 0.6;
+    }
+
+    /* ─── Top Header ────────────────────────────── */
+    .top-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: rgba(251,251,251,0.88);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 200;
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+    .top-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 700;
+      font-size: 14.5px;
+      color: var(--heading);
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .header-logo img {
+      border-radius: 6px;
+      transition: filter var(--transition);
+    }
+    [data-theme="dark"] .header-logo img {
+      filter: brightness(0) invert(1);
+      opacity: 0.92;
+    }
+    [data-theme="light"] .header-logo img {
+      filter: brightness(0.1);
+      opacity: 0.85;
+    }
+    .header-divider {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+    .header-meta { min-width: 0; }
+    .header-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--fg);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-subtitle {
+      font-size: 11.5px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .top-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .theme-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--accent-a);
+      border: 1px solid #3F3F4666;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transition: background var(--transition);
+    }
+    .theme-pill:hover { background: var(--accent-ah); }
+    .diagram-count-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .header-kbd-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10.5px;
+      color: var(--muted);
+      opacity: 0.6;
+      white-space: nowrap;
+    }
+    .header-kbd-hint kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-family: inherit;
+      font-size: 10px;
+      line-height: 16px;
+    }
+    /* Mobile menu button */
+    .menu-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .menu-btn:hover { background: var(--accent-a); color: var(--accent); border-color: var(--accent); }
+
+    /* ─── Layout ────────────────────────────────── */
+    .app-layout {
+      display: flex;
+      padding-top: var(--header-h);
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── Sidebar ───────────────────────────────── */
+    .sidebar {
+      position: fixed;
+      top: var(--header-h);
+      left: 0;
+      width: var(--sidebar-w);
+      height: calc(100vh - var(--header-h));
+      background: rgba(249,249,249,0.95);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 16px 0 24px;
+      z-index: 100;
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sidebar.collapsed { transform: translateX(-100%); }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 16px 10px;
+      opacity: 0.7;
+    }
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 16px 7px 14px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      color: var(--muted);
+      text-decoration: none;
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+      position: relative;
+    }
+    .toc-item:hover {
+      background: var(--accent-a);
+      color: var(--fg);
+      text-decoration: none;
+    }
+    .toc-item.active {
+      background: var(--accent-a);
+      border-left-color: var(--accent);
+      color: var(--accent);
+    }
+    .toc-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--accent);
+      box-shadow: 0 0 8px #3F3F4666;
+    }
+    .toc-icon {
+      flex-shrink: 0;
+      opacity: 0.65;
+      display: flex;
+      align-items: center;
+      transition: opacity var(--transition);
+    }
+    .toc-item.active .toc-icon,
+    .toc-item:hover .toc-icon { opacity: 1; }
+    .toc-label {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.01em;
+    }
+    .toc-type {
+      flex-shrink: 0;
+      font-size: 10px;
+      color: var(--muted);
+      opacity: 0.6;
+      font-weight: 500;
+    }
+    .toc-item.active .toc-type { color: var(--accent); opacity: 0.75; }
+
+    /* ─── Main Content ──────────────────────────── */
+    .main-content {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 28px 36px 72px;
+      max-width: calc(100% - var(--sidebar-w));
+      transition: margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                  max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .main-content.expanded {
+      margin-left: 0;
+      max-width: 100%;
+    }
+
+    /* ─── Document Overview ───────────────────────── */
+    .doc-overview {
+      margin-bottom: 32px;
+      padding: 24px;
+      background: linear-gradient(135deg, #f7f7f7 0%, #F4F4F5 100%);
+      border-radius: 12px;
+      border: 1px solid #D4D4D8;
+    }
+    .overview-content {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #27272A;
+    }
+    .overview-content p { margin-bottom: 12px; }
+    .overview-content p:last-child { margin-bottom: 0; }
+
+    /* ─── Analysis & Key Nodes ───────────────────── */
+    .analysis-block {
+      margin-bottom: 16px;
+      padding: 16px;
+      background: #F4F4F5;
+      border-radius: 8px;
+      border-left: 3px solid #3F3F46;
+    }
+    .analysis-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #3F3F46;
+      margin-bottom: 8px;
+    }
+    .analysis-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #27272A;
+    }
+    .key-nodes {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .key-node-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: #3F3F4618;
+      color: #3F3F46;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* ─── Summary Section (独立风格，与图表区域明显区分) ─── */
+    .summary-section {
+      margin-top: 80px;
+      padding: 32px 36px;
+      background: #ffffff;
+      border: 2px double #D4D4D8;
+      border-radius: 4px;
+      position: relative;
+    }
+    /* 分隔装饰线 */
+    .summary-section::before {
+      content: "";
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: #71717A;
+      border-radius: 2px;
+    }
+    .summary-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: #71717A;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .summary-title svg { color: #71717A; opacity: 0.5; }
+    .summary-content {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #27272A;
+    }
+    .summary-content p { margin-bottom: 12px; }
+    .success-factors {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #D4D4D8;
+    }
+    .success-factors-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: #71717A;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .success-factor {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: #27272A;
+      opacity: 0.85;
+    }
+    .success-factor svg {
+      flex-shrink: 0;
+      margin-top: 3px;
+      color: #71717A;
+      opacity: 0.8;
+    }
+
+    /* ─── SVG Controls (Zoom + Download) ─────────── */
+    .svg-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 4px;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.18s;
+      pointer-events: none;
+    }
+    .svg-render-area:hover .svg-controls {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .svg-control-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #F4F4F5;
+      border: 1px solid #D4D4D8;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #27272A;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .svg-control-btn:hover {
+      background: #3F3F46;
+      border-color: #3F3F46;
+      color: #fff;
+    }
+    .svg-control-btn svg { width: 14px; height: 14px; pointer-events: none; }
+
+    /* ─── Diagram Section ───────────────────────── */
+    .diagram-section {
+      margin-bottom: 36px;
+      scroll-margin-top: calc(var(--header-h) + 20px);
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Semantic Role Legend ──────────────────── */
+    .role-legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 16px;
+      padding: 10px 20px;
+      font-size: 11.5px;
+    }
+    .role-legend-title {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0.65;
+      flex-shrink: 0;
+    }
+    .role-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .role-legend-swatch {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .role-legend-label {
+      font-weight: 500;
+    }
+    .role-legend-nodes {
+      font-size: 10.5px;
+      font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
+      opacity: 0.7;
+    }
+    .role-legend-nodes::before { content: '('; }
+    .role-legend-nodes::after  { content: ')'; }
+
+    /* ─── Diagram Card ──────────────────────────── */
+    .diagram-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      box-shadow:
+        0 1px 2px rgba(0,0,0,.04),
+        0 4px 12px rgba(0,0,0,.04),
+        0 0 0 0 #3F3F4600;
+      transition:
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      /* 顶部彩色渐变线 —— 品牌记忆点 */
+      border-top: 2px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+    }
+    .diagram-card::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), rgba(63,63,70,0.6), var(--accent));
+      background-size: 200% 100%;
+      animation: shimmer 3s ease infinite;
+      border-radius: var(--radius-card) var(--radius-card) 0 0;
+      opacity: 0.8;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .diagram-card:hover {
+      box-shadow:
+        0 2px 8px rgba(0,0,0,.06),
+        0 12px 32px rgba(0,0,0,.06),
+        0 0 0 1px #3F3F4622;
+      transform: translateY(-2px);
+    }
+
+    /* Card Header */
+    .diagram-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 22px 26px 18px;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+    }
+    .diagram-card-header-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      min-width: 0;
+    }
+    .diagram-icon-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--accent-a), var(--accent-ah));
+      border: 1px solid #3F3F4644;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--accent);
+      box-shadow: 0 2px 8px #3F3F4622;
+      transition: box-shadow var(--transition);
+    }
+    .diagram-card:hover .diagram-icon-wrap {
+      box-shadow: 0 4px 14px #3F3F4640;
+    }
+    .diagram-icon-wrap svg { display: block; flex-shrink: 0; }
+    .diagram-title-wrap { min-width: 0; padding-top: 2px; }
+    .diagram-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: -0.025em;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .diagram-desc {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.5;
+    }
+    .diagram-card-header-right {
+      flex-shrink: 0;
+      padding-top: 3px;
+    }
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    /* Stats Row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-card {
+      display: flex;
+      position: relative;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+      transition: background var(--transition);
+      cursor: default;
+    }
+    .stat-card:last-child { border-right: none; }
+    .stat-card:hover { background: var(--accent-a); }
+    .stat-card:hover .stat-accent-bar { opacity: 1; width: 4px; }
+    .stat-accent-bar {
+      width: 3px;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, var(--accent), rgba(63,63,70,0.15));
+      opacity: 0.45;
+      transition: opacity var(--transition), width var(--transition);
+    }
+    .stat-body {
+      padding: 16px 16px 14px;
+      flex: 1;
+      min-width: 0;
+    }
+    .stat-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 7px;
+    }
+    .stat-icon {
+      color: var(--accent);
+      opacity: 0.75;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      transition: opacity var(--transition);
+    }
+    .stat-card:hover .stat-icon { opacity: 1; }
+    .stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stat-detail {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* SVG Render Area */
+    .svg-render-area {
+      background: var(--svg-area);
+      position: relative;
+      width: 100%;
+      min-height: min(52vw, 480px);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* 点阵背景 — 让 SVG 悬浮在网格上 */
+      background-image:
+        radial-gradient(circle, rgba(0,0,0,0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      background-color: var(--svg-area);
+    }
+    .svg-render-inner {
+      padding: 32px 40px;
+      width: 100%;
+      min-width: 0;
+    }
+    .svg-render-inner svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.06));
+    }
+
+    /* Card Footer / Code Toggle */
+    .card-footer {
+      padding: 10px 22px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fcfcfc;
+    }
+    .code-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 13px;
+      border-radius: 7px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition);
+    }
+    .code-toggle-btn:hover, .code-toggle-btn.open {
+      background: var(--accent-a);
+      border-color: #3F3F4666;
+      color: var(--accent);
+    }
+    .toggle-chevron { transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1); }
+    .code-toggle-btn.open .toggle-chevron { transform: rotate(180deg); }
+
+    /* Code Block */
+    .code-block {
+      display: none;
+      border-top: 1px solid var(--border);
+    }
+    .code-block.open { display: block; }
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 22px;
+      background: var(--code-bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .code-lang-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition);
+    }
+    .copy-btn:hover { border-color: #3F3F4666; color: var(--accent); }
+    .copy-btn.copied { color: #22c55e; border-color: #22c55e55; background: #22c55e0e; }
+    .code-pre {
+      margin: 0;
+      padding: 20px 22px;
+      background: var(--code-bg);
+      overflow-x: auto;
+      font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+      font-size: 12.5px;
+      line-height: 1.75;
+      color: var(--fg);
+      tab-size: 2;
+    }
+    .code-pre code { display: block; }
+
+    /* ─── Flow Summary ──────────────────────────── */
+    .flow-summary {
+      border-top: 1px solid var(--border);
+      padding: 22px 26px 18px;
+      background: #fdfdfd;
+    }
+    .summary-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .summary-header svg { opacity: 0.85; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .summary-block {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color var(--transition);
+    }
+    .summary-block:hover { border-color: #3F3F4655; }
+    .summary-block-wide { grid-column: 1 / -1; }
+    .summary-block-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: #fafafa;
+      opacity: 0.9;
+    }
+    .summary-block-label svg { opacity: 0.65; flex-shrink: 0; }
+    .summary-block-content { padding: 10px 14px; }
+
+    /* 起止节点 */
+    .summary-start-end { display: flex; flex-direction: column; gap: 7px; }
+    .summary-se-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 12.5px;
+    }
+    .summary-se-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .summary-se-dot.start { background: #22c55e; box-shadow: 0 0 6px #22c55e66; }
+    .summary-se-dot.end   { background: #ef4444; box-shadow: 0 0 6px #ef444466; }
+    .summary-se-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      min-width: 28px;
+      text-transform: uppercase;
+    }
+    .summary-se-val {
+      color: var(--fg);
+      font-size: 12.5px;
+      font-weight: 500;
+    }
+
+    /* 角色标签 */
+    .summary-roles { display: flex; flex-wrap: wrap; gap: 5px; }
+    .summary-role-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 14px;
+      font-size: 11.5px;
+      font-weight: 500;
+      background: var(--accent-a);
+      color: var(--accent);
+      border: 1px solid #3F3F4644;
+      transition: background var(--transition);
+    }
+    .summary-role-tag:hover { background: var(--accent-ah); }
+
+    /* 主流程步骤 */
+    .summary-steps { display: flex; flex-wrap: wrap; gap: 5px; align-items: flex-start; }
+    .summary-step-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px 3px 5px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 12px;
+      transition: border-color var(--transition);
+    }
+    .summary-step-item:hover { border-color: #3F3F4655; }
+    .summary-step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .summary-step-text { color: var(--fg); font-weight: 500; }
+
+    /* 判断分支 */
+    .summary-branch-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 9px;
+    }
+    .summary-branch-item:last-child { margin-bottom: 0; }
+    .summary-branch-q {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .summary-branch-conds { display: flex; flex-wrap: wrap; gap: 4px; }
+    .summary-cond-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 9px;
+      background: #3b82f614;
+      color: #3b82f6;
+      border: 1px solid #3b82f640;
+      border-radius: 6px;
+      font-size: 11.5px;
+      transition: background var(--transition);
+    }
+    .summary-cond-tag:hover { background: #3b82f622; }
+    .summary-empty { font-size: 11.5px; color: var(--muted); font-style: italic; opacity: 0.7; }
+
+    /* 异常分支 */
+    .summary-errors { display: flex; flex-wrap: wrap; gap: 5px; }
+    .summary-error-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      background: #ef444414;
+      color: #ef4444;
+      border: 1px solid #ef444440;
+      border-radius: 6px;
+      font-size: 11.5px;
+      transition: background var(--transition);
+    }
+    .summary-error-tag:hover { background: #ef444422; }
+
+    /* ─── Self Check Panel ───────────────────────── */
+    .self-check-panel {
+      border-top: 1px solid var(--border);
+      padding: 20px 26px 18px;
+      background: #fbfbfb;
+    }
+    .check-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+    .check-header-left {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--fg);
+    }
+    .check-header-left svg { color: var(--accent); opacity: 0.85; }
+    .check-overall {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+    .check-items {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .check-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 13px;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    }
+    .check-item:hover {
+      background: var(--check-bg, var(--accent-a));
+      border-color: var(--check-color, var(--accent));
+      transform: translateY(-1px);
+    }
+    .check-item-header {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+    .check-icon { display: flex; align-items: center; flex-shrink: 0; }
+    .check-label {
+      flex: 1;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .check-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 6px;
+      border-radius: 10px;
+      border: 1px solid;
+      font-size: 10px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .check-message {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ─── Sidebar Overlay (mobile) ──────────────── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 90;
+      backdrop-filter: blur(2px);
+    }
+    .sidebar-overlay.show { display: block; }
+
+    /* ─── Scrollbar Global ──────────────────────── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    /* ─── Stagger animation for sections ────────── */
+    .diagram-section:nth-child(1)  { animation-delay: 0.05s; }
+    .diagram-section:nth-child(2)  { animation-delay: 0.12s; }
+    .diagram-section:nth-child(3)  { animation-delay: 0.18s; }
+    .diagram-section:nth-child(4)  { animation-delay: 0.24s; }
+    .diagram-section:nth-child(5)  { animation-delay: 0.30s; }
+    .diagram-section:nth-child(n+6){ animation-delay: 0.36s; }
+
+    /* ─── prefers-reduced-motion ────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .diagram-section {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+      .diagram-card::before { animation: none; }
+      .diagram-card:hover { transform: none; }
+      .check-item:hover { transform: none; }
+      * { transition-duration: 0.01ms !important; }
+    }
+
+    /* ─── Focus styles ──────────────────────────── */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* ─── Mermaid 关键词语法着色 ─────────────────── */
+    /* 基础关键词 - graph/flowchart 方向 */
+    .code-pre .kw-dir { color: #7c3aed; font-weight: 500; }
+    /* 节点声明符号 */
+    .code-pre .kw-node { color: #0369a1; }
+    /* 箭头/边 */
+    .code-pre .kw-arrow { color: #15803d; }
+    /* 字符串/文本 */
+    .code-pre .kw-string { color: #b45309; }
+    /* 注释 */
+    .code-pre .kw-comment { color: var(--muted); font-style: italic; }
+    /* 关键词 (graph, flowchart, sequence 等) */
+    .code-pre .kw-type { color: #9333ea; font-weight: 600; }
+
+    /* ─── Fullscreen Overlay ─────────────────────── */
+    .fullscreen-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+    .fullscreen-overlay.show {
+      display: flex;
+      animation: fsIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes fsIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .fullscreen-overlay svg {
+      max-width: 90vw;
+      max-height: 90vh;
+      width: auto;
+      height: auto;
+    }
+    .fullscreen-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .fullscreen-close:hover {
+      background: var(--accent-a);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .fullscreen-kbd-hints {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .fullscreen-kbd-hints kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.18);
+      font-family: inherit;
+      font-size: 10px;
+      line-height: 16px;
+    }
+    /* SVG 区域：默认可拖拽，悬停显示提示 */
+    .svg-render-area {
+      cursor: grab;
+    }
+    .svg-render-area.dragging {
+      cursor: grabbing;
+    }
+    .svg-render-area:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+    /* 让 SVG 内部所有子元素不拦截鼠标事件 */
+    .svg-render-inner svg,
+    .svg-render-inner svg * {
+      pointer-events: none !important;
+    }
+
+    /* ─── Responsive ────────────────────────────── */
+    @media (max-width: 960px) {
+      .sidebar {
+        transform: translateX(-100%);
+        z-index: 150;
+        background: var(--sidebar-bg);
+        box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content { margin-left: 0; max-width: 100%; padding: 24px 20px 56px; }
+      .menu-btn { display: inline-flex; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .stat-card:nth-child(2) { border-right: none; }
+      .summary-grid { grid-template-columns: 1fr; }
+      .check-items { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 640px) {
+      :root { --header-h: 54px; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .top-header-right .theme-pill,
+      .top-header-right .diagram-count-badge,
+      .top-header-right .header-kbd-hint { display: none; }
+      .main-content { padding: 16px 14px 48px; }
+      .svg-render-inner { padding: 20px 16px; }
+      .check-items { grid-template-columns: 1fr 1fr; }
+      .flow-summary, .self-check-panel { padding: 16px 16px 14px; }
+      .diagram-card-header { padding: 16px 18px 14px; }
+      .diagram-title { font-size: 15px; }
+    }
+
+    /* ─── Page Footer ─── */
+    .page-footer {
+      text-align: center;
+      padding: 18px 24px 22px;
+      margin-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .page-footer-text {
+      font-size: 11.5px;
+      color: var(--muted);
+      opacity: 0.65;
+      letter-spacing: 0.02em;
+      user-select: none;
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+<!-- ─── Skip to main content (WCAG 2.4.1) ─── -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- ─── Fullscreen SVG Overlay ─── -->
+<div class="fullscreen-overlay" id="fullscreen-overlay" role="dialog" aria-modal="true" aria-label="Full screen diagram" onclick="window.closeFullscreen(event)">
+  <button class="fullscreen-close" onclick="window.closeFullscreen()" aria-label="Close fullscreen (ESC)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+  <div class="fullscreen-kbd-hints" aria-hidden="true">
+    <kbd>ESC</kbd> 退出 &nbsp;·&nbsp; <kbd>F</kbd> 浏览器全屏
+  </div>
+  <div id="fullscreen-content"></div>
+</div>
+
+<!-- ─── Mobile Sidebar Overlay ─── -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- ═══ Fixed Top Header ═══ -->
+<header class="top-header" role="banner">
+  <div class="top-header-left">
+    <button class="menu-btn" id="menu-btn" onclick="toggleSidebar()" aria-label="Toggle navigation">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="header-logo">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHYAAAB2CAYAAAAdp2cRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF0mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgOS4xLWMwMDEgNzkuMTQ2Mjg5OTc3NywgMjAyMy8wNi8yNS0yMzo1NzoxNCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIiB4bWxuczpwaG90b3Nob3A9Imh0dHA6Ly9ucy5hZG9iZS5jb20vcGhvdG9zaG9wLzEuMC8iIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDI1LjMgKE1hY2ludG9zaCkiIHhtcDpDcmVhdGVEYXRlPSIyMDI2LTAzLTI3VDIyOjMxOjUxKzA4OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDI2LTAzLTI3VDIyOjMxOjUxKzA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyNi0wMy0yN1QyMjozMTo1MSswODowMCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDphNjgyYmUwZC1mNjRmLTQ2YzktYTdiYi00M2ZlMGJlOTdlZjciIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDo1N2IyNzFjNS1mMjFiLWY3NDktODkwMC00ZDlkNzRhZTcxYWQiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmZmY0MzdmMy0yYjIzLTRjNDAtYmExYS1mMzZkOTE4MWE1NDQiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmZmY0MzdmMy0yYjIzLTRjNDAtYmExYS1mMzZkOTE4MWE1NDQiIHN0RXZ0OndoZW49IjIwMjYtMDMtMjdUMjI6MzE6NTErMDg6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyNS4zIChNYWNpbnRvc2gpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDphNjgyYmUwZC1mNjRmLTQ2YzktYTdiYi00M2ZlMGJlOTdlZjciIHN0RXZ0OndoZW49IjIwMjYtMDMtMjdUMjI6MzE6NTErMDg6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyNS4zIChNYWNpbnRvc2gpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pt54BPcAAAZdSURBVHic7Z1LbBVVGIC/O1FKGhAaH9Fo6lu0xChG40YSYzcmusBXiIkvIIIaqCaAJoKGFA0xCMYEAYmaICpiysONloVB2GBFXeBGYAULq8QWrKEoUOrib8nt7dzHnDmPmXv/LzmB3jtzzj/365nOPXPOPwXMaAJmAu3ADGAacAXQbFifIgwAfwG/AT8D+4A9wJDrhtuADcAJYFiLl3IcWA/cVIOfxLQCW4HzGTjQRi3nRhy0VnFVEwVgEXAqAwemRcoA8OKIGyOagZ0ZOBAt8WUHBtc0LcD+DASvpXLpAaaUcTiOZlRqnkoPMT239DxdQLr4rNINA7Ab6Pbc5ipgouc2bbATeAwRHUsH4X8DR8sKO8eciJMGcWaldBQfSFT0/1bkN1bJJ3OLfygW+w46cpRXhoAFxS+Mim0DZnsPR7HF28hF1AVGxXaQ4guvEpQDwMrSFyNkQF97az45DTyNDDeOIULu0kz1HJBihyXAobg3IuTWm5I/upE7bbFEwF3+YlEs0Q/Mo8KARATc4i0cxRYLgN8rbRAhMx+U/LAF6Kq2UYQOSuSJY8j98apE1TdRMsIw8Czwdy0bq9j8sBb4vtaNVWw++BVYlmQHFZt9zgBPAf8l2UnFZp/lwMGkO6nYbLMPWGOyo4rNLv8AzyBzuROjYrPLQuCo6c4qNpvsAD5NU4GKzR5/APPTVqJis8dcoC9tJSo2W2wEvrVRkYrNDkeAxbYqU7HZYAgZXRq0VaGKzQZvAT/arFDFhucAItYqKjYsp5FT8Ljpo2lRsWFZDBx2UbGKDUc38vXGCSo2DP3IQETZ6aNpUbFhmA/0umxAxfpnC7DddSMq1i/HkNtxzlGx/hhGbpwP+GhMxfrjXWCvr8ZUrB8OAm/4bFDFuucMsjg50fTRtKhY9yzDYPpoWlSsW/YiSzO8o2LdMYAsojKaPpoWFeuORaSYPpoWFeuG7aScPpoWFWufXkqypAVgkoq1zzwsTB9NyVoVa5cNWJo+moKHgedVrD0OIwm1QnI58DHo31hbDCGjS9amjxqyiZEsQCrWDiuxPH3UgDmUZIYPnRk77xnGe4CLAsRazPXIgMiFuLTHpmOQMtlHPRIBm4HJpS8q5izB0fTRBCxFMtiOI/QpN6+n4m8In7z7DuR24Lj4tMea0UeV7KMemIBMjJsQ96aKNcP59NEaOIc8kjQWFZuczUiOiNCcB56jTG5FFZuMo5Q8uCgwZaezqtja8Tp9NAGfAV+Vvqhia2c1kikti7xEScZxFVsbB4E3QwdRgT4qPAJNicco+2gAdgPrRn9QsdV5HckXnAdeY+Q5PCq2MnuB90IHkYBBRlIfqNjyDJAi+2hAfgI6VWx5FiLfE/PIKhUbTxcyDptX9FQcQy/wQugg0qJixzKMpeyjoVGxY1mPpOnJPSp2LCtCB2ALFTuWs6EDsIWKrVNUbJ2iYusUFVunqNg6RcXWKSq2TlGxYbgbaHHZgIr1zyRgG7L63Rkq1j/vAzcAs4EnXTYUevFVlhZlueZRxh7jSeAaFw1pj/XHVUgqgWKmIEtGrK/aU7F+KACfAJfGvPcA8IqLRkOfchvhVLyQysf6LzDdZoPaY91zG7I8pBJNyBqc2LWuJqhYt1wMfA5MrGHbO4FOWw2rWLd0AjMSbL8UuM9GwyrWHTOBVxPuEyHTXidX27CWihT7XIIIMvl8r0MGMVIRET5NXD2yDrg2xf5zgEfSBBABx9NUoIzjCSSpV1o2AVea7hwRPgFVPXE18KGlui4DPsJwVCoCfrEUSKNTQIYHbd6OewhJPZSYCPjOYiCNzMtAu4N61wA3m+zYBJwg/BBinocUpyPDgq4+ix9ImGE1QnIrbEt1WI1NE/DFyL+uuBdJmZCYNmTlduhemsceuxo/n8dZ4B6TALd6CrCexN6P3w5xCGhOGmQrcMpjkHkXOxVJZeD7c/nAJNiOAIHmVWzIM9yD1YIr/fJbQDJ7zjI6VLt8DewKHUQZbgSWB2y/F7idhCvvm4H9hO+xWiqXrnICK9GCys1DebycwEo0AzszELyW+NKFwRXyKAXkgipLV8uNXgaRyXFWpqy2IleBWRvEaLTyJXIj3jptyJqTExk4yEYp/cBG4NYa/FzAtDs3IXN62pHJWtOQh+UZn/MVAE4DfwJHgANIRvM9SM7kRPwPL8vMlvoYx3MAAAAASUVORK5CYII=" alt="Beautiful Mermaid" width="22" height="22" style="display:block;object-fit:contain;border-radius:5px;">
+      Beautiful Mermaid
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-meta">
+      <div class="header-title">电商平台整合流程图</div>
+      <div class="header-subtitle">1 张图 · Beautiful Mermaid 渲染</div>
+    </div>
+  </div>
+  <div class="top-header-right">
+    <span class="theme-pill">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+      </svg>
+      zinc-light
+    </span>
+    <span class="diagram-count-badge">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+      </svg>
+      1 diagrams
+    </span>
+    <span class="header-kbd-hint" aria-hidden="true" title="按 F 切换浏览器全屏">
+      <kbd>F</kbd> 全屏
+    </span>
+  </div>
+</header>
+
+<!-- ═══ App Layout ═══ -->
+<div class="app-layout">
+
+  <!-- ─── Sidebar / TOC ─── -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Diagram contents">
+    <div class="sidebar-section-title">Contents</div>
+    
+      <a href="#diagram-0" class="toc-item" data-idx="0"
+         onclick="scrollToCard(0, event)"
+         title="流程图">
+        <span class="toc-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="5" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="8" y="16" width="8" height="5" rx="1"/><path d="M6.5 8v3h11V8"/><path d="M12 11v5"/></svg></span>
+        <span class="toc-label">电商平台整合流程图</span>
+        <span class="toc-type" aria-label="流程图">流程图</span>
+      </a>
+  </aside>
+
+  <!-- ─── Main Content ─── -->
+  <main class="main-content" id="main-content" role="main" tabindex="-1">
+    
+    
+  <!-- ═══ Diagram 1: 电商平台整合流程图 ═══ -->
+  <section class="diagram-section" id="diagram-0" aria-labelledby="dtitle-0">
+    <!-- Card Header -->
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <div class="diagram-card-header-left">
+          <div class="diagram-icon-wrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="9" y="15" width="6" height="6" rx="1"/><path d="M6 9v3a3 3 0 0 0 3 3h3"/><path d="M18 9v3a3 3 0 0 1-3 3h-0.1"/></svg></div>
+          <div class="diagram-title-wrap">
+            <h2 class="diagram-title" id="dtitle-0">电商平台整合流程图</h2>
+            
+          </div>
+        </div>
+        <div class="diagram-card-header-right">
+          <span class="type-badge" style="background:#3b82f622;color:#3b82f6;border-color:#3b82f644;"
+                aria-label="流程图">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="5" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="8" y="16" width="8" height="5" rx="1"/><path d="M6.5 8v3h11V8"/><path d="M12 11v5"/></svg>
+            流程图
+          </span>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        
+        <div class="stat-card">
+          <div class="stat-accent-bar"></div>
+          <div class="stat-body">
+            <div class="stat-header">
+              <span class="stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>
+              <span class="stat-label">图表类型</span>
+            </div>
+            <div class="stat-value">流程图</div>
+            <div class="stat-detail">自上而下流程图</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-accent-bar"></div>
+          <div class="stat-body">
+            <div class="stat-header">
+              <span class="stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="4" cy="6" r="2"/><circle cx="20" cy="6" r="2"/><circle cx="4" cy="18" r="2"/><circle cx="20" cy="18" r="2"/><path d="M6 6.5l4 4M14 13.5l4 4M6 17.5l4-4M14 10.5l4-4"/></svg></span>
+              <span class="stat-label">节点总数</span>
+            </div>
+            <div class="stat-value">30 个</div>
+            <div class="stat-detail">含 9 个子图</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-accent-bar"></div>
+          <div class="stat-body">
+            <div class="stat-header">
+              <span class="stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+              <span class="stat-label">连接数量</span>
+            </div>
+            <div class="stat-value">34 条</div>
+            <div class="stat-detail">分支较多</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-accent-bar"></div>
+          <div class="stat-body">
+            <div class="stat-header">
+              <span class="stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="5" rx="1"/><rect x="9" y="11" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M6 8v3h6v3h6"/></svg></span>
+              <span class="stat-label">分层结构</span>
+            </div>
+            <div class="stat-value">9 层</div>
+            <div class="stat-detail">含子图分组</div>
+          </div>
+        </div>
+      </div>
+
+      
+
+      <!-- SVG Render Area -->
+      <div class="svg-render-area" data-idx="0"
+           aria-label="拖拽移动 · 滚轮缩放 电商平台整合流程图">
+        <!-- SVG Controls -->
+        <div class="svg-controls">
+          <button class="svg-control-btn" onclick="event.stopPropagation();window.svgZoomIn(0)" title="放大" aria-label="放大">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <button class="svg-control-btn" onclick="event.stopPropagation();window.svgZoomOut(0)" title="缩小" aria-label="缩小">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <button class="svg-control-btn" onclick="event.stopPropagation();window.svgReset(0)" title="恢复原始大小和位置" aria-label="恢复原始大小和位置">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          <button class="svg-control-btn" onclick="event.stopPropagation();window.downloadSvg(0)" title="下载 SVG" aria-label="下载 SVG">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+        </div>
+        <div class="svg-render-inner" id="svg-container-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1433.4199999999998 1087.8" width="100%" height="1087.8" style="--bg:#FFFFFF;--fg:#27272A;--line:#A1A1AA;--accent:#3F3F46;--muted:#71717A;--surface:#F4F4F5;--border:#D4D4D8;--_line:#A1A1AA;--_arrow:#A1A1AA;--_text:#27272A;--_text-sec:#71717A;--_text-muted:#71717A;--_node-fill:#FFFFFF;--_node-stroke:#71717A;--_group-fill:#3F3F4618;--_group-hdr:#3F3F46;--_inner-stroke:#71717A" id="bm-diagram-1">
+<style>
+#bm-diagram-1 {
+  /* 覆盖 CSS 变量 */
+  --_text:       #27272A       !important;
+  --_text-sec:   #71717A !important;
+  --_line:       #A1A1AA      !important;
+  --_arrow:      #A1A1AA      !important;
+  --_node-fill:  #FFFFFF       !important;
+  --_node-stroke:#71717A    !important;
+  --_group-fill: #3F3F4618 !important;
+  --_group-hdr:  #3F3F46 !important;
+}
+#bm-diagram-1 text {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace !important;
+  font-size:   13px !important;
+  dominant-baseline: central;
+  dy: 0.35em;
+}
+/* ── 类图/ER图标题文字：覆盖内联 dy，实现真正的垂直居中 ── */
+/* 类图类名、ER图实体名使用 renderMultilineText 渲染，内联 dy 与 font-size 相关，
+   但某些字体下 central 基线对中文不准确，改用 middle + 动态 dy 计算 */
+#bm-diagram-1 .class-node text,
+#bm-diagram-1 .entity text {
+  dy: 0.35em !important;
+}
+/* 类图/ER图标题使用 middle 基线，对中文字体更友好 */
+#bm-diagram-1 .class-node > text:first-of-type,
+#bm-diagram-1 .class-node text[text-anchor="middle"],
+#bm-diagram-1 .entity > text:first-of-type,
+#bm-diagram-1 .entity text[text-anchor="middle"] {
+  dominant-baseline: middle !important;
+}
+/* ── 节点形状：类选择器 + 通用元素选择器双保险，确保无论 cleanHardcodedColors 是否删除 fill 属性都能生效 ── */
+/* 排除 .block 内的矩形（时序图 loop/alt/opt/rect 块），避免覆盖其专属样式 */
+#bm-diagram-1 .node rect,
+#bm-diagram-1 .node circle,
+#bm-diagram-1 .node ellipse,
+#bm-diagram-1 .node polygon,
+#bm-diagram-1 .node path,
+#bm-diagram-1 rect,
+#bm-diagram-1 circle,
+#bm-diagram-1 ellipse {
+  fill:         #FFFFFF        !important;
+  stroke:       #71717A     !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 0px 0px transparent) !important;
+}
+/* ── 时序图 block（loop/alt/opt）矩形：覆盖通用 rect 规则 ── */
+/* 外边框矩形（block 内第一个 rect）：fill none，只有描边 */
+#bm-diagram-1 .block > rect:first-of-type {
+  fill:         none !important;
+  stroke:       #71717A !important;
+  stroke-width: 1px !important;
+  filter:       none !important;
+}
+/* header tab 矩形（block 内第二个 rect，即 rect + rect）：accent 半透明填充 */
+#bm-diagram-1 .block > rect:nth-of-type(2) {
+  fill:         #3F3F4630 !important;
+  stroke:       #71717A !important;
+  stroke-width: 1px !important;
+  filter:       none !important;
+}
+/* 时序图 block（loop/alt/opt）文字：10px */
+#bm-diagram-1 .block text {
+  font-size: 10px !important;
+}
+/* seq-rect-bg：rect rgb(...) 纯背景色块，不加描边，不加阴影 */
+#bm-diagram-1 .seq-rect-bg {
+  stroke:       none !important;
+  stroke-width: 0 !important;
+  filter:       none !important;
+}
+#bm-diagram-1 .node rect {
+  rx: 4px !important;
+  ry: 4px !important;
+}
+/* 菱形/多边形节点 */
+#bm-diagram-1 .node polygon {
+  fill:   #FFFFFF     !important;
+  stroke: #71717A  !important;
+  stroke-width: 2px !important;
+}
+/* 节点文字 */
+#bm-diagram-1 g.node text,
+#bm-diagram-1 .label text,
+#bm-diagram-1 .nodeLabel {
+  fill: #27272A !important;
+}
+/* 子图/cluster 标题 */
+#bm-diagram-1 .cluster-label text {
+  fill:        #3F3F46 !important;
+  font-size:   12px !important;
+  font-weight: 600 !important;
+}
+/* cluster 容器 */
+#bm-diagram-1 .cluster rect {
+  fill:   #3F3F4618 !important;
+  stroke: #71717A !important;
+  stroke-width: 1px !important;
+  filter: none !important;
+}
+/* 边/连线：只选连线相关路径，不影响节点内部形状 */
+#bm-diagram-1 .edge path,
+#bm-diagram-1 .edgePath path,
+#bm-diagram-1 .edgePath .path {
+  fill:         none          !important;
+  stroke:       #A1A1AA  !important;
+  stroke-width: 2px !important;
+}
+/* 连线（line 元素） */
+#bm-diagram-1 .edge line,
+#bm-diagram-1 .flowchart-link {
+  stroke:       #A1A1AA  !important;
+  stroke-width: 2px !important;
+}
+/* 箭头：marker 内的多边形/路径专属 */
+#bm-diagram-1 marker polygon,
+#bm-diagram-1 marker path,
+#bm-diagram-1 .arrowhead polygon,
+#bm-diagram-1 .arrowhead path {
+  stroke: #A1A1AA !important;
+  fill:   #A1A1AA !important;
+  filter: none !important;
+}
+/* 边标签 */
+#bm-diagram-1 .edgeLabel text,
+#bm-diagram-1 .edgeLabel {
+  fill:      #71717A !important;
+  font-size: 11px  !important;
+}
+/* ── Semantic Role Colors ── */
+#bm-diagram-1 .bm-critical.node rect,
+#bm-diagram-1 .bm-critical.node circle,
+#bm-diagram-1 .bm-critical.node ellipse,
+#bm-diagram-1 .bm-critical.node polygon {
+  fill:   #FFF7ED   !important;
+  stroke: #F97316 !important;
+  stroke-width: 2px   !important;
+}
+#bm-diagram-1 .bm-critical.node text {
+  fill: #9A3412 !important;
+}
+#bm-diagram-1 .bm-success.node rect,
+#bm-diagram-1 .bm-success.node circle,
+#bm-diagram-1 .bm-success.node ellipse,
+#bm-diagram-1 .bm-success.node polygon {
+  fill:   #F0FDF4   !important;
+  stroke: #22C55E !important;
+  stroke-width: 2px   !important;
+}
+#bm-diagram-1 .bm-success.node text {
+  fill: #166534 !important;
+}
+#bm-diagram-1 .bm-danger.node rect,
+#bm-diagram-1 .bm-danger.node circle,
+#bm-diagram-1 .bm-danger.node ellipse,
+#bm-diagram-1 .bm-danger.node polygon {
+  fill:   #FEF2F2   !important;
+  stroke: #EF4444 !important;
+  stroke-width: 2px   !important;
+}
+#bm-diagram-1 .bm-danger.node text {
+  fill: #991B1B !important;
+}
+#bm-diagram-1 .bm-info.node rect,
+#bm-diagram-1 .bm-info.node circle,
+#bm-diagram-1 .bm-info.node ellipse,
+#bm-diagram-1 .bm-info.node polygon {
+  fill:   #EFF6FF   !important;
+  stroke: #3B82F6 !important;
+  stroke-width: 2px   !important;
+}
+#bm-diagram-1 .bm-info.node text {
+  fill: #1D4ED8 !important;
+}
+#bm-diagram-1 .bm-muted.node rect,
+#bm-diagram-1 .bm-muted.node circle,
+#bm-diagram-1 .bm-muted.node ellipse,
+#bm-diagram-1 .bm-muted.node polygon {
+  fill:   #F4F4F5   !important;
+  stroke: #A1A1AA !important;
+  stroke-width: 2px   !important;
+}
+#bm-diagram-1 .bm-muted.node text {
+  fill: #52525B !important;
+}</style>
+<style>
+  
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<g class="subgraph" data-id="APP" data-label="共用 App 核心">
+  <rect x="509.87232142857147" y="520.6" width="565.50125" height="317.40000000000003" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="509.87232142857147" y="520.6" width="565.50125" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="521.8723214285715" y="534.6" font-size="12" font-weight="600" fill="var(--_text-sec)">共用 App 核心</text>
+</g>
+<g class="subgraph" data-id="TAOBAO" data-label="淘宝/天猫平台">
+  <rect x="465.5799999999999" y="177" width="269.28" height="283.6" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="465.5799999999999" y="177" width="269.28" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="477.5799999999999" y="191" font-size="12" font-weight="600" fill="var(--_text-sec)">淘宝/天猫平台</text>
+</g>
+<g class="subgraph" data-id="JD" data-label="京东平台">
+  <rect x="762.8599999999999" y="177" width="269.28" height="283.6" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="762.8599999999999" y="177" width="269.28" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="774.8599999999999" y="191" font-size="12" font-weight="600" fill="var(--_text-sec)">京东平台</text>
+</g>
+<g class="subgraph" data-id="PDD" data-label="拼多多平台">
+  <rect x="1060.1399999999999" y="189" width="269.28" height="283.6" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="1060.1399999999999" y="189" width="269.28" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="1072.1399999999999" y="203" font-size="12" font-weight="600" fill="var(--_text-sec)">拼多多平台</text>
+</g>
+<g class="subgraph" data-id="THIRD" data-label="第三方服务整合">
+  <rect x="40" y="40" width="333.28" height="444.5" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="40" y="40" width="333.28" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="52" y="54" font-size="12" font-weight="600" fill="var(--_text-sec)">第三方服务整合</text>
+<g class="subgraph" data-id="PAY" data-label="支付服务">
+  <rect x="209.23" y="84" width="148.05" height="210.70000000000002" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="209.23" y="84" width="148.05" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="221.23" y="98" font-size="12" font-weight="600" fill="var(--_text-sec)">支付服务</text>
+</g>
+<g class="subgraph" data-id="LOGISTICS" data-label="物流服务">
+  <rect x="56" y="84" width="133.23" height="210.70000000000002" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="56" y="84" width="133.23" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="68" y="98" font-size="12" font-weight="600" fill="var(--_text-sec)">物流服务</text>
+</g>
+<g class="subgraph" data-id="SERVICE" data-label="客服与售后">
+  <rect x="56" y="314.70000000000005" width="282.46" height="153.8" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="56" y="314.70000000000005" width="282.46" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="68" y="328.70000000000005" font-size="12" font-weight="600" fill="var(--_text-sec)">客服与售后</text>
+</g>
+</g>
+<g class="subgraph" data-id="DATA" data-label="数据与分析">
+  <rect x="680.9223214285714" y="886" width="312.1" height="161.8" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="680.9223214285714" y="886" width="312.1" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="692.9223214285714" y="900" font-size="12" font-weight="600" fill="var(--_text-sec)">数据与分析</text>
+</g>
+<polyline class="edge" data-from="user" data-to="login" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="437.78,129 437.78,346.8 993.9385714285715,346.8 993.9385714285715,564.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="user" data-to="home" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="437.78,129 437.78,346.8 583.8973214285714,346.8 583.8973214285714,564.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="home" data-to="tb_search" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="554.8848214285715,618.4000000000001 554.8848214285715,838 554.8848214285715,850 430.5799999999999,850 430.5799999999999,165 539.6049999999999,165 539.6049999999999,177 539.6049999999999,231.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="home" data-to="jd_search" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="583.8973214285714,618.4000000000001 583.8973214285714,838 583.8973214285714,862 442.5799999999999,862 442.5799999999999,153 836.8849999999999,153 836.8849999999999,177 836.8849999999999,231.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="home" data-to="pdd_search" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="612.9098214285715,618.4000000000001 612.9098214285715,838 612.9098214285715,862 1354.82,862 1354.82,177 1134.165,177 1134.165,189 1134.165,231.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="tb_coupon" data-to="order" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="539.6049999999999,448.55000000000007 539.6049999999999,509.57500000000005 826.4785714285715,509.57500000000005 826.4785714285715,564.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="tb_review" data-to="order" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="668.2449999999999,268.3 668.2449999999999,509.57500000000005 826.4785714285715,509.57500000000005 826.4785714285715,564.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="jd_coupon" data-to="order" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="836.8849999999999,448.55000000000007 836.8849999999999,509.57500000000005 826.4785714285715,509.57500000000005 826.4785714285715,564.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="jd_review" data-to="order" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="965.5249999999999,268.3 965.5249999999999,509.57500000000005 826.4785714285715,509.57500000000005 826.4785714285715,564.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pdd_coupon" data-to="order" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1134.165,454.55000000000007 1134.165,509.57500000000005 826.4785714285715,509.57500000000005 826.4785714285715,564.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pdd_review" data-to="order" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1262.8049999999998,268.3 1262.8049999999998,509.57500000000005 826.4785714285715,509.57500000000005 826.4785714285715,564.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pay" data-to="alipay" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="855.4910714285714,720.2 855.4910714285716,838 1349.4199999999998,838 1349.4199999999998,146.45 225.23,146.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pay" data-to="wechat_pay" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="826.4785714285715,720.2 826.4785714285715,838 20,838 20,203.35000000000002 225.23,203.35000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pay" data-to="union_pay" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="797.4660714285715,720.2 797.4660714285715,732.2 798.9723214285715,732.2 798.9723214285715,838 1361.4199999999998,838 1361.4199999999998,249.85 225.23,249.85" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pay" data-to="sf" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="840.9848214285714,720.2 840.9848214285714,838 8,838 8,146.45 72,146.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pay" data-to="ems" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="811.9723214285715,720.2 811.9723214285715,732.2 812.7254464285716,732.2 812.7254464285716,838 1373.4199999999998,838 1373.4199999999998,203.35000000000002 72,203.35000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pay" data-to="jd_logistics" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="869.9973214285715,720.2 869.9973214285715,838 -4,838 -4,249.85 72,249.85" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="order" data-to="ai_service" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="850.7602380952382,618.4000000000001 850.7602380952382,642.4000000000001 894.5035714285715,642.4000000000001 894.5035714285715,838 1385.4199999999998,838 1385.4199999999998,359.2 72,359.2" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="order" data-to="refund" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="875.0419047619048,618.4000000000001 875.0419047619048,630.4000000000001 907.5035714285715,630.4000000000001 907.5035714285715,838 -16,838 -16,430.1000000000001 72,430.1000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="user" data-to="analytics" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="437.78,129 437.78,346.8 762.3573214285714,346.8 762.3573214285714,962.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="order" data-to="analytics" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="826.4785714285715,618.4 826.4785714285715,642.4000000000001 762.3573214285714,642.4000000000001 762.3573214285714,962.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="msg" data-to="user" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="730.9473214285715,822 730.9473214285715,838 730.9473214285715,874 417.5799999999999,874 417.5799999999999,153 428.88,153 428.88,129" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="order" data-to="pay" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="826.4785714285715,618.4 826.4785714285715,642.4000000000001 826.4785714285714,642.4000000000001 826.4785714285714,666.4000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="order" data-to="msg" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="826.4785714285715,618.4 826.4785714285715,642.4000000000001 730.9473214285714,642.4000000000001 730.9473214285714,768.2" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pay" data-to="msg" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="782.9598214285716,720.2 782.9598214285716,732.2 750.2889880952382,732.2 750.2889880952382,768.2" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="tb_search" data-to="tb_cart" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="539.6049999999999,285.20000000000005 539.6049999999999,340.75" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="tb_cart" data-to="tb_coupon" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="539.6049999999999,377.65000000000003 539.6049999999999,411.65000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="jd_search" data-to="jd_cart" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="836.8849999999999,285.20000000000005 836.8849999999999,340.75" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="jd_cart" data-to="jd_coupon" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="836.8849999999999,377.65000000000003 836.8849999999999,411.65000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pdd_search" data-to="pdd_cart" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1134.165,285.20000000000005 1134.165,340.75" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="pdd_cart" data-to="pdd_coupon" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1134.165,377.65000000000003 1134.165,417.65000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="refund" data-to="dispute" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="173.23,432.1500000000001 221.23,432.1500000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="analytics" data-to="recom" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="827.7923214285714,974.75 839.7923214285714,974.75 839.7923214285714,948.45 875.7923214285714,948.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="analytics" data-to="dashboard" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="827.7923214285714,987.05 839.7923214285714,987.05 839.7923214285714,1013.35 875.7923214285714,1013.35" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="user" data-label="用户" data-shape="circle">
+  <circle cx="437.78" cy="84.5" r="44.5" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="437.78" y="84.5" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">用户</text>
+</g>
+<g class="node" data-id="login" data-label="用户登录
+统一账号体系" data-shape="rectangle">
+  <rect x="928.5035714285715" y="564.6" width="130.87" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="993.9385714285715" y="591.5" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="993.9385714285715" dy="-3.9000000000000012">用户登录</tspan><tspan x="993.9385714285715" dy="16.900000000000002">统一账号体系</tspan></text>
+</g>
+<g class="node" data-id="home" data-label="首页聚合
+多平台入口" data-shape="rectangle">
+  <rect x="525.8723214285715" y="564.6" width="116.05" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="583.8973214285714" y="591.5" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="583.8973214285714" dy="-3.9000000000000012">首页聚合</tspan><tspan x="583.8973214285714" dy="16.900000000000002">多平台入口</tspan></text>
+</g>
+<g class="node" data-id="order" data-label="订单中心
+全平台订单管理" data-shape="rectangle">
+  <rect x="753.6335714285715" y="564.6" width="145.69" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="826.4785714285715" y="591.5" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="826.4785714285715" dy="-3.9000000000000012">订单中心</tspan><tspan x="826.4785714285715" dy="16.900000000000002">全平台订单管理</tspan></text>
+</g>
+<g class="node" data-id="pay" data-label="支付中心
+统一收银台" data-shape="rectangle">
+  <rect x="768.4535714285714" y="666.4000000000001" width="116.05" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="826.4785714285714" y="693.3000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="826.4785714285714" dy="-3.9000000000000012">支付中心</tspan><tspan x="826.4785714285714" dy="16.900000000000002">统一收银台</tspan></text>
+</g>
+<g class="node" data-id="msg" data-label="消息中心
+全平台通知" data-shape="rectangle">
+  <rect x="672.9223214285714" y="768.2" width="116.05" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="730.9473214285714" y="795.1" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="730.9473214285714" dy="-3.9000000000000012">消息中心</tspan><tspan x="730.9473214285714" dy="16.900000000000002">全平台通知</tspan></text>
+</g>
+<g class="node" data-id="tb_search" data-label="商品搜索
+比价功能" data-shape="rectangle">
+  <rect x="488.98999999999995" y="231.4" width="101.22999999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="539.6049999999999" y="258.3" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="539.6049999999999" dy="-3.9000000000000012">商品搜索</tspan><tspan x="539.6049999999999" dy="16.900000000000002">比价功能</tspan></text>
+</g>
+<g class="node" data-id="tb_cart" data-label="购物车同步" data-shape="rectangle">
+  <rect x="481.5799999999999" y="340.75" width="116.05" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="539.6049999999999" y="359.2" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">购物车同步</text>
+</g>
+<g class="node" data-id="tb_coupon" data-label="优惠券互通" data-shape="rectangle">
+  <rect x="481.5799999999999" y="411.65000000000003" width="116.05" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="539.6049999999999" y="430.1" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">优惠券互通</text>
+</g>
+<g class="node" data-id="tb_review" data-label="评价共享" data-shape="rectangle">
+  <rect x="617.6299999999999" y="231.4" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="668.2449999999999" y="249.85000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">评价共享</text>
+</g>
+<g class="node" data-id="jd_search" data-label="商品搜索
+京东直营" data-shape="rectangle">
+  <rect x="786.2699999999999" y="231.4" width="101.22999999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="836.8849999999999" y="258.3" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="836.8849999999999" dy="-3.9000000000000012">商品搜索</tspan><tspan x="836.8849999999999" dy="16.900000000000002">京东直营</tspan></text>
+</g>
+<g class="node" data-id="jd_cart" data-label="购物车同步" data-shape="rectangle">
+  <rect x="778.8599999999999" y="340.75" width="116.05" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="836.8849999999999" y="359.2" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">购物车同步</text>
+</g>
+<g class="node" data-id="jd_coupon" data-label="京豆抵扣" data-shape="rectangle">
+  <rect x="786.2699999999999" y="411.65000000000003" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="836.8849999999999" y="430.1" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">京豆抵扣</text>
+</g>
+<g class="node" data-id="jd_review" data-label="评价共享" data-shape="rectangle">
+  <rect x="914.9099999999999" y="231.4" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="965.5249999999999" y="249.85000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">评价共享</text>
+</g>
+<g class="node" data-id="pdd_search" data-label="商品搜索
+团购模式" data-shape="rectangle">
+  <rect x="1083.55" y="231.4" width="101.22999999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1134.165" y="258.3" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1134.165" dy="-3.9000000000000012">商品搜索</tspan><tspan x="1134.165" dy="16.900000000000002">团购模式</tspan></text>
+</g>
+<g class="node" data-id="pdd_cart" data-label="购物车同步" data-shape="rectangle">
+  <rect x="1076.1399999999999" y="340.75" width="116.05" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1134.165" y="359.2" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">购物车同步</text>
+</g>
+<g class="node" data-id="pdd_coupon" data-label="拼单优惠" data-shape="rectangle">
+  <rect x="1083.55" y="417.65000000000003" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1134.165" y="436.1" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">拼单优惠</text>
+</g>
+<g class="node" data-id="pdd_review" data-label="评价共享" data-shape="rectangle">
+  <rect x="1212.1899999999998" y="231.4" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1262.8049999999998" y="249.85000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">评价共享</text>
+</g>
+<g class="node" data-id="alipay" data-label="支付宝" data-shape="rectangle">
+  <rect x="225.23" y="128" width="86.41" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="268.435" y="146.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">支付宝</text>
+</g>
+<g class="node" data-id="wechat_pay" data-label="微信支付" data-shape="rectangle">
+  <rect x="225.23" y="184.9" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="275.84499999999997" y="203.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">微信支付</text>
+</g>
+<g class="node" data-id="union_pay" data-label="银联云闪付" data-shape="rectangle">
+  <rect x="225.23" y="231.4" width="116.05" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="283.255" y="249.85000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">银联云闪付</text>
+</g>
+<g class="node" data-id="sf" data-label="顺丰速运" data-shape="rectangle">
+  <rect x="72" y="128" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="122.615" y="146.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">顺丰速运</text>
+</g>
+<g class="node" data-id="ems" data-label="邮政EMS" data-shape="rectangle">
+  <rect x="72" y="184.9" width="100.489" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="122.2445" y="203.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">邮政EMS</text>
+</g>
+<g class="node" data-id="jd_logistics" data-label="京东物流" data-shape="rectangle">
+  <rect x="72" y="231.4" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="122.615" y="249.85000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">京东物流</text>
+</g>
+<g class="node" data-id="ai_service" data-label="AI智能客服" data-shape="rectangle">
+  <rect x="72" y="340.75" width="113.086" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="128.543" y="359.2" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">AI智能客服</text>
+</g>
+<g class="node" data-id="refund" data-label="极速退款" data-shape="rectangle">
+  <rect x="72" y="411.65000000000003" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="122.615" y="430.1" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">极速退款</text>
+</g>
+<g class="node" data-id="dispute" data-label="纠纷仲裁" data-shape="rectangle">
+  <rect x="221.23" y="417.65000000000003" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="271.84499999999997" y="436.1" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">纠纷仲裁</text>
+</g>
+<g class="node" data-id="analytics" data-label="用户行为分析" data-shape="rectangle">
+  <rect x="696.9223214285714" y="962.45" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="762.3573214285714" y="980.9000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">用户行为分析</text>
+</g>
+<g class="node" data-id="recom" data-label="智能推荐" data-shape="rectangle">
+  <rect x="875.7923214285714" y="930" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="926.4073214285714" y="948.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">智能推荐</text>
+</g>
+<g class="node" data-id="dashboard" data-label="运营看板" data-shape="rectangle">
+  <rect x="875.7923214285714" y="994.9" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="926.4073214285714" y="1013.35" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)">运营看板</text>
+</g>
+</svg></div>
+      </div>
+
+      
+    <div class="role-legend" style="background:#f9f9f9;border-top:1px solid #D4D4D8;">
+      <span class="role-legend-title" style="color:#71717A;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        节点角色
+      </span>
+      
+      <div class="role-legend-item">
+        <span class="role-legend-swatch" style="background:#FFF7ED;border:1.5px solid #F97316;"></span>
+        <span class="role-legend-label" style="color:#27272A;">关键节点</span>
+        <span class="role-legend-nodes" style="color:#71717A;">核心流程</span>
+      </div>
+      <div class="role-legend-item">
+        <span class="role-legend-swatch" style="background:#F0FDF4;border:1.5px solid #22C55E;"></span>
+        <span class="role-legend-label" style="color:#27272A;">成功/完成</span>
+        <span class="role-legend-nodes" style="color:#71717A;">成功路径</span>
+      </div>
+      <div class="role-legend-item">
+        <span class="role-legend-swatch" style="background:#EFF6FF;border:1.5px solid #3B82F6;"></span>
+        <span class="role-legend-label" style="color:#27272A;">重要处理</span>
+        <span class="role-legend-nodes" style="color:#71717A;">信息流</span>
+      </div>
+      <div class="role-legend-item">
+        <span class="role-legend-swatch" style="background:#FEF2F2;border:1.5px solid #EF4444;"></span>
+        <span class="role-legend-label" style="color:#27272A;">失败/风险</span>
+        <span class="role-legend-nodes" style="color:#71717A;">风险点</span>
+      </div>
+    </div>
+      
+  <!-- Flow Summary -->
+  <div class="flow-summary">
+    <div class="summary-header">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      流程规格总结
+    </div>
+    <div class="summary-grid">
+
+      <!-- 起止 -->
+      <div class="summary-block">
+        <div class="summary-block-label">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          流程起止
+        </div>
+        <div class="summary-block-content">
+          <div class="summary-start-end">
+            <div class="summary-se-item">
+              <span class="summary-se-dot start"></span>
+              <span class="summary-se-label">起点</span>
+              <span class="summary-se-val">&quot;评价共享&quot; / &quot;评价共享&quot; / &quot;评价共享&quot;</span>
+            </div>
+            <div class="summary-se-item">
+              <span class="summary-se-dot end"></span>
+              <span class="summary-se-label">终点</span>
+              <span class="summary-se-val">&quot;用户登录&lt;br/&gt;统一账号体系&quot; / &quot;支付宝&quot; / &quot;微信支付&quot;</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 角色 -->
+      <div class="summary-block">
+        <div class="summary-block-label">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          角色列表
+        </div>
+        <div class="summary-block-content summary-roles">
+          
+    <span class="summary-role-tag">APP[&quot;共用 App 核心&quot;]</span>
+    <span class="summary-role-tag">TAOBAO[&quot;淘宝/天猫平台&quot;]</span>
+    <span class="summary-role-tag">JD[&quot;京东平台&quot;]</span>
+    <span class="summary-role-tag">PDD[&quot;拼多多平台&quot;]</span>
+    <span class="summary-role-tag">THIRD[&quot;第三方服务整合&quot;]</span>
+    <span class="summary-role-tag">PAY[&quot;支付服务&quot;]</span>
+    <span class="summary-role-tag">LOGISTICS[&quot;物流服务&quot;]</span>
+    <span class="summary-role-tag">SERVICE[&quot;客服与售后&quot;]</span>
+    <span class="summary-role-tag">DATA[&quot;数据与分析&quot;]</span>
+        </div>
+      </div>
+
+      <!-- 主流程 -->
+      <div class="summary-block summary-block-wide">
+        <div class="summary-block-label">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          主流程步骤
+        </div>
+        <div class="summary-block-content">
+          <div class="summary-steps">
+    <div class="summary-step-item">
+      <span class="summary-step-num">1</span>
+      <span class="summary-step-text">&quot;评价共享&quot;</span>
+    </div>
+    <div class="summary-step-item">
+      <span class="summary-step-num">2</span>
+      <span class="summary-step-text">&quot;订单中心&lt;br/&gt;全平台订单管理&quot;</span>
+    </div>
+    <div class="summary-step-item">
+      <span class="summary-step-num">3</span>
+      <span class="summary-step-text">&quot;支付中心&lt;br/&gt;统一收银台&quot;</span>
+    </div>
+    <div class="summary-step-item">
+      <span class="summary-step-num">4</span>
+      <span class="summary-step-text">&quot;支付宝&quot;</span>
+    </div></div>
+        </div>
+      </div>
+
+      <!-- 判断分支 -->
+      <div class="summary-block summary-block-wide">
+        <div class="summary-block-label">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l5.1 5.1M4 4l5 5"/></svg>
+          判断分支
+        </div>
+        <div class="summary-block-content"><span class="summary-empty">（此图表类型暂无判断分支，或分支无标签）</span></div>
+      </div>
+
+      <!-- 异常/边界 -->
+      <div class="summary-block summary-block-wide">
+        <div class="summary-block-label">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          异常分支 / 边界规则
+        </div>
+        <div class="summary-block-content summary-errors">
+          <span class="summary-empty">（未检测到失败/异常分支，建议补充）</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+      
+  <!-- Self Check Panel -->
+  <div class="self-check-panel">
+    <div class="check-header">
+      <div class="check-header-left">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        落地自检清单
+      </div>
+      <div class="check-overall" style="color:#f59e0b;background:#f59e0b18;border-color:#f59e0b44;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        3/5 通过 · 基本完整，建议完善高亮项
+      </div>
+    </div>
+    <div class="check-items">
+      
+    <div class="check-item" style="--check-color:#22c55e;--check-bg:#22c55e18;">
+      <div class="check-item-header">
+        <span class="check-icon" style="color:#22c55e;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <span class="check-label">闭环完整性</span>
+        <span class="check-badge" style="background:#22c55e18;color:#22c55e;border-color:#22c55e44;">通过</span>
+      </div>
+      <div class="check-message">起点「&quot;评价共享&quot;」→ 终点「&quot;用户登录&lt;br/&gt;统一账号体系&quot;」，流程闭合</div>
+    </div>
+    <div class="check-item" style="--check-color:#f59e0b;--check-bg:#f59e0b18;">
+      <div class="check-item-header">
+        <span class="check-icon" style="color:#f59e0b;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+        <span class="check-label">异常分支覆盖</span>
+        <span class="check-badge" style="background:#f59e0b18;color:#f59e0b;border-color:#f59e0b44;">建议完善</span>
+      </div>
+      <div class="check-message">未检测到异常/失败分支，建议补充超时、取消、错误处理</div>
+    </div>
+    <div class="check-item" style="--check-color:#22c55e;--check-bg:#22c55e18;">
+      <div class="check-item-header">
+        <span class="check-icon" style="color:#22c55e;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <span class="check-label">角色清晰度</span>
+        <span class="check-badge" style="background:#22c55e18;color:#22c55e;border-color:#22c55e44;">通过</span>
+      </div>
+      <div class="check-message">已识别角色：APP[&quot;共用 App 核心&quot;]、TAOBAO[&quot;淘宝/天猫平台&quot;]、JD[&quot;京东平台&quot;]、PDD[&quot;拼多多平台&quot;]</div>
+    </div>
+    <div class="check-item" style="--check-color:#f59e0b;--check-bg:#f59e0b18;">
+      <div class="check-item-header">
+        <span class="check-icon" style="color:#f59e0b;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+        <span class="check-label">状态流转合理</span>
+        <span class="check-badge" style="background:#f59e0b18;color:#f59e0b;border-color:#f59e0b44;">建议完善</span>
+      </div>
+      <div class="check-message">连接数(34) 较少，部分节点可能是孤立状态</div>
+    </div>
+    <div class="check-item" style="--check-color:#22c55e;--check-bg:#22c55e18;">
+      <div class="check-item-header">
+        <span class="check-icon" style="color:#22c55e;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <span class="check-label">可落地性</span>
+        <span class="check-badge" style="background:#22c55e18;color:#22c55e;border-color:#22c55e44;">通过</span>
+      </div>
+      <div class="check-message">识别到 4 个主流程步骤，可对应前端页面和接口</div>
+    </div>
+    </div>
+  </div>
+
+      <!-- Code Toggle Footer -->
+      <div class="card-footer">
+        <button class="code-toggle-btn" data-code-id="code-0" aria-expanded="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          查看源码
+          <svg class="toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div class="code-block" id="code-0">
+        <div class="code-block-header">
+          <span class="code-lang-tag">mermaid</span>
+          <button class="copy-btn" data-copy-id="code-src-0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            复制
+          </button>
+        </div>
+        <pre class="code-pre"><code id="code-src-0"># @roles critical:核心流程 success:成功路径 info:信息流 danger:风险点
+
+flowchart TB
+    subgraph APP[&quot;共用 App 核心&quot;]
+        direction TB
+        login[&quot;用户登录&lt;br/&gt;统一账号体系&quot;]
+        home[&quot;首页聚合&lt;br/&gt;多平台入口&quot;]
+        order[&quot;订单中心&lt;br/&gt;全平台订单管理&quot;]
+        pay[&quot;支付中心&lt;br/&gt;统一收银台&quot;]
+        msg[&quot;消息中心&lt;br/&gt;全平台通知&quot;]
+    end
+
+    subgraph TAOBAO[&quot;淘宝/天猫平台&quot;]
+        direction TB
+        tb_search[&quot;商品搜索&lt;br/&gt;比价功能&quot;]
+        tb_cart[&quot;购物车同步&quot;]
+        tb_coupon[&quot;优惠券互通&quot;]
+        tb_review[&quot;评价共享&quot;]
+    end
+
+    subgraph JD[&quot;京东平台&quot;]
+        direction TB
+        jd_search[&quot;商品搜索&lt;br/&gt;京东直营&quot;]
+        jd_cart[&quot;购物车同步&quot;]
+        jd_coupon[&quot;京豆抵扣&quot;]
+        jd_review[&quot;评价共享&quot;]
+    end
+
+    subgraph PDD[&quot;拼多多平台&quot;]
+        direction TB
+        pdd_search[&quot;商品搜索&lt;br/&gt;团购模式&quot;]
+        pdd_cart[&quot;购物车同步&quot;]
+        pdd_coupon[&quot;拼单优惠&quot;]
+        pdd_review[&quot;评价共享&quot;]
+    end
+
+    subgraph THIRD[&quot;第三方服务整合&quot;]
+        direction TB
+        subgraph PAY[&quot;支付服务&quot;]
+            alipay[&quot;支付宝&quot;]
+            wechat_pay[&quot;微信支付&quot;]
+            union_pay[&quot;银联云闪付&quot;]
+        end
+
+        subgraph LOGISTICS[&quot;物流服务&quot;]
+            sf[&quot;顺丰速运&quot;]
+            ems[&quot;邮政EMS&quot;]
+            jd_logistics[&quot;京东物流&quot;]
+        end
+
+        subgraph SERVICE[&quot;客服与售后&quot;]
+            ai_service[&quot;AI智能客服&quot;]
+            refund[&quot;极速退款&quot;]
+            dispute[&quot;纠纷仲裁&quot;]
+        end
+    end
+
+    subgraph DATA[&quot;数据与分析&quot;]
+        analytics[&quot;用户行为分析&quot;]
+        recom[&quot;智能推荐&quot;]
+        dashboard[&quot;运营看板&quot;]
+    end
+
+    %% 用户入口
+    user((&quot;用户&quot;))
+
+    %% 用户到App
+    user --&gt; login
+    user --&gt; home
+
+    %% App到各平台
+    home --&gt; tb_search
+    home --&gt; jd_search
+    home --&gt; pdd_search
+
+    %% 淘宝流程
+    tb_search --&gt; tb_cart
+    tb_cart --&gt; tb_coupon
+    tb_coupon --&gt; order
+    tb_review --&gt; order
+
+    %% 京东流程
+    jd_search --&gt; jd_cart
+    jd_cart --&gt; jd_coupon
+    jd_coupon --&gt; order
+    jd_review --&gt; order
+
+    %% 拼多多流程
+    pdd_search --&gt; pdd_cart
+    pdd_cart --&gt; pdd_coupon
+    pdd_coupon --&gt; order
+    pdd_review --&gt; order
+
+    %% 订单到支付
+    order --&gt; pay
+
+    %% 支付到第三方
+    pay --&gt; alipay
+    pay --&gt; wechat_pay
+    pay --&gt; union_pay
+
+    %% 物流
+    pay --&gt; sf
+    pay --&gt; ems
+    pay --&gt; jd_logistics
+
+    %% 客服
+    order --&gt; ai_service
+    order --&gt; refund
+    refund --&gt; dispute
+
+    %% 数据流
+    user --&gt; analytics
+    order --&gt; analytics
+    analytics --&gt; recom
+    analytics --&gt; dashboard
+
+    %% 消息通知
+    order --&gt; msg
+    pay --&gt; msg
+    msg --&gt; user</code></pre>
+      </div>
+    </div>
+  </section>
+    
+  </main>
+
+</div>
+
+<script>
+// ─── TOC 高亮（基于 IntersectionObserver）+ URL hash 深链接
+// IIFE 包装已移除，所有代码在全局作用域执行
+(function() {
+  // 检查元素是否存在
+  const tocLinks = document.querySelectorAll('.toc-item');
+  const sections = document.querySelectorAll('.diagram-section');
+  if (!sections.length) return;
+
+  // 初始化：若 URL 有 hash，滚动到对应 section
+  const initHash = window.location.hash;
+  if (initHash) {
+    const target = document.querySelector(initHash);
+    if (target) {
+      requestAnimationFrame(() => {
+        const offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 60;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset - 20;
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+    }
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        tocLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+        // 更新 URL hash（不触发跳转）
+        if (history.replaceState) {
+          history.replaceState(null, '', '#' + id);
+        }
+        // 同步 TOC 滚动到可见区
+        const activeLink = document.querySelector('.toc-item.active');
+        if (activeLink) {
+          activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+      }
+    });
+  }, { rootMargin: '-60px 0px -55% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+})();
+
+// ─── 平滑滚动
+function scrollToCard(idx, event) {
+  event && event.preventDefault();
+  const el = document.getElementById('diagram-' + idx);
+  if (el) {
+    const offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 60;
+    const top = el.getBoundingClientRect().top + window.scrollY - offset - 20;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+  // 移动端点击 TOC 后关闭侧边栏
+  if (window.innerWidth <= 960) closeSidebar();
+}
+
+// ─── 移动端侧边栏
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const isOpen  = sidebar.classList.toggle('open');
+  overlay.classList.toggle('show', isOpen);
+  document.getElementById('menu-btn').setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+  const menuBtn = document.getElementById('menu-btn');
+  if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+}
+
+// ─── 事件委托：代码块按钮（使用事件委托确保兼容性）
+document.addEventListener('click', function(e) {
+  // 查看源码按钮
+  const toggleBtn = e.target.closest('.code-toggle-btn');
+  if (toggleBtn) {
+    const id = toggleBtn.dataset.codeId;
+    if (id) window.toggleCode(id, toggleBtn);
+    return;
+  }
+  // 复制按钮
+  const copyBtn = e.target.closest('.copy-btn');
+  if (copyBtn) {
+    const id = copyBtn.dataset.copyId;
+    if (id) window.copyCode(id);
+    return;
+  }
+});
+
+// ─── 全屏弹窗：移动端触摸手势（下滑关闭）
+(function() {
+  let _touchStartY = 0, _touchStartX = 0;
+  document.addEventListener('touchstart', function(e) {
+    const overlay = document.getElementById('fullscreen-overlay');
+    if (!overlay || !overlay.classList.contains('show')) return;
+    _touchStartY = e.touches[0].clientY;
+    _touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e) {
+    const overlay = document.getElementById('fullscreen-overlay');
+    if (!overlay || !overlay.classList.contains('show')) return;
+    const dy = e.changedTouches[0].clientY - _touchStartY;
+    const dx = e.changedTouches[0].clientX - _touchStartX;
+    // 下滑距离 > 80px 且垂直方向为主时关闭
+    if (dy > 80 && Math.abs(dy) > Math.abs(dx) * 1.5) {
+      overlay.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+  }, { passive: true });
+})();
+
+// ─── 键盘全局快捷键
+document.addEventListener('keydown', e => {
+  // ESC：关闭全屏或侧边栏
+  if (e.key === 'Escape') {
+    const fs = document.getElementById('fullscreen-overlay');
+    if (fs && fs.classList.contains('show')) {
+      fs.classList.remove('show');
+      document.body.style.overflow = '';
+    } else {
+      closeSidebar();
+    }
+    return;
+  }
+  // F / f：切换浏览器全屏
+  if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return; // 输入框内不触发
+    if (!document.fullscreenElement) {
+      // 尝试多种全屏API
+      const requestFS = document.documentElement.requestFullscreen
+        || document.documentElement.webkitRequestFullscreen
+        || document.documentElement.mozRequestFullScreen
+        || document.documentElement.msRequestFullscreen;
+      requestFS && requestFS.call(document.documentElement);
+    } else {
+      // 尝试多种退出全屏API
+      const exitFS = document.exitFullscreen
+        || document.webkitExitFullscreen
+        || document.mozCancelFullScreen
+        || document.msExitFullscreen;
+      exitFS && exitFS.call(document);
+    }
+  }
+});
+
+// ─── Mermaid 语法着色（简易 tokenizer）
+(function highlightMermaid() {
+  const KEYWORDS = /^(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|stateDiagram-v2|erDiagram|gantt|pie|xychart-beta|mindmap|timeline|gitGraph|TD|TB|LR|RL|BT)$/i;
+  const ARROWS = /^(-+>|-->|-.->|===>|--[|o*]|<--)/;
+  const pres = document.querySelectorAll('.code-pre code');
+  pres.forEach(pre => {
+    const lines = pre.textContent.split('\n');
+    pre.innerHTML = lines.map(line => {
+      // 注释行
+      if (/^\s*%%/.test(line)) {
+        return '<span class="kw-comment">' + escHtml2(line) + '</span>';
+      }
+      // 逐词着色
+      return line.replace(/("[^"]*")|(%%.*)|(-->|-->|==>|-.->|--[|o*x]?[->]|<--)|(\b(?:graph|flowchart|sequenceDiagram|classDiagram|stateDiagram(?:-v2)?|erDiagram|gantt|pie|xychart-beta|mindmap|timeline|gitGraph|TD|TB|LR|RL|BT|participant|actor|activate|deactivate|loop|alt|else|end|opt|par|critical|break|rect|Note|note)\b)/g,
+        (m, str, cmt, arr, kw) => {
+          if (str) return '<span class="kw-string">' + escHtml2(m) + '</span>';
+          if (cmt) return '<span class="kw-comment">' + escHtml2(m) + '</span>';
+          if (arr) return '<span class="kw-arrow">' + escHtml2(m) + '</span>';
+          if (kw)  return '<span class="kw-type">' + escHtml2(m) + '</span>';
+          return escHtml2(m);
+        }
+      );
+    }).join('\n');
+  });
+  function escHtml2(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
+
+// ─── 全局函数（在 IIFE 外部定义，确保全局可用）
+window.toggleCode = function(id, btn) {
+  const block = document.getElementById(id);
+  if (!block) return;
+  const isOpen = block.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  for (const node of btn.childNodes) {
+    if (node.nodeType === 3 && node.textContent.trim()) {
+      node.textContent = isOpen ? ' 收起源码' : ' 查看源码';
+      break;
+    }
+  }
+};
+
+window.copyCode = async function(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  try {
+    await navigator.clipboard.writeText(el.textContent);
+    const btn = el.closest('.code-block').querySelector('.copy-btn');
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 已复制';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+    }
+  } catch(e) {
+    try {
+      const range = document.createRange();
+      range.selectNode(el);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      document.execCommand('copy');
+      window.getSelection().removeAllRanges();
+    } catch(_) {}
+  }
+};
+
+window.openFullscreen = function(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const svgEl = container.querySelector('svg');
+  if (!svgEl) return;
+  const fsContent = document.getElementById('fullscreen-content');
+  fsContent.innerHTML = '';
+  const clone = svgEl.cloneNode(true);
+  clone.setAttribute('width', '100%');
+  clone.setAttribute('height', '100%');
+  fsContent.appendChild(clone);
+  const overlay = document.getElementById('fullscreen-overlay');
+  overlay.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  // 聚焦以便接收 ESC 键
+  overlay.focus();
+};
+
+window.closeFullscreen = function(e) {
+  if (e && e.target !== e.currentTarget) return;
+  const overlay = document.getElementById('fullscreen-overlay');
+  overlay.classList.remove('show');
+  document.body.style.overflow = '';
+};
+
+// SVG 缩放 + 下载
+window.svgZoomState = window.svgZoomState || {};
+
+window.svgZoomIn = function(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const scale = Math.min((window.svgZoomState[idx] || 1) + 0.25, 4);
+  window.svgZoomState[idx] = scale;
+  _applySvgTransform(idx);
+};
+window.svgZoomOut = function(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const scale = Math.max((window.svgZoomState[idx] || 1) - 0.25, 0.25);
+  window.svgZoomState[idx] = scale;
+  _applySvgTransform(idx);
+};
+window.svgReset = function(idx) {
+  window.svgZoomState[idx] = 1;
+  window.svgPanState[idx]  = { x: 0, y: 0 };
+  _applySvgTransform(idx);
+};
+window.downloadSvg = function(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const svg = container.querySelector('svg');
+  if (!svg) return;
+  const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'diagram-' + idx + '.svg';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+function _applySvgTransform(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const scale = window.svgZoomState[idx] || 1;
+  const pan   = window.svgPanState[idx]  || { x: 0, y: 0 };
+  container.style.transformOrigin = '50% 50%';
+  container.style.transform = 'translate(' + (pan.x || 0) + 'px,' + (pan.y || 0) + 'px) scale(' + scale + ')';
+}
+
+// SVG 拖拽平移 + 点击全屏（阈值区分）
+// 拖拽距离 > 5px → 平移；否则 mouseup 触发全屏
+window.svgPanState = window.svgPanState || {};
+
+(function initSvgDrag() {
+  document.addEventListener('mousedown', function(e) {
+    if (e.button !== 0) return;
+    const area = e.target.closest('.svg-render-area');
+    if (!area) return;
+    const idx = parseInt(area.dataset.idx, 10);
+    if (isNaN(idx)) return;
+
+    const container = document.getElementById('svg-container-' + idx);
+    if (!container) return;
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const pan = window.svgPanState[idx] || { x: 0, y: 0 };
+    const baseX = pan.x || 0;
+    const baseY = pan.y || 0;
+    let moved = false;
+
+    area.classList.add('dragging');
+
+    function onMove(ev) {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      if (!moved && Math.sqrt(dx * dx + dy * dy) > 5) moved = true;
+      if (moved) {
+        // 边界限制：SVG 不能拖出 svg-render-area 区域
+        const scale = window.svgZoomState[idx] || 1;
+        const areaRect = area.getBoundingClientRect();
+        const svgEl = container.querySelector('svg');
+        const svgW = svgEl ? svgEl.getBoundingClientRect().width / scale * scale : areaRect.width;
+        const svgH = svgEl ? svgEl.getBoundingClientRect().height / scale * scale : areaRect.height;
+        // 可移动的最大偏移量 = (SVG 尺寸 * scale - 容器尺寸) / 2，最小为 0
+        const maxX = Math.max(0, (svgW * scale - areaRect.width) / 2 + areaRect.width * 0.1);
+        const maxY = Math.max(0, (svgH * scale - areaRect.height) / 2 + areaRect.height * 0.1);
+        const newX = Math.min(maxX, Math.max(-maxX, baseX + dx));
+        const newY = Math.min(maxY, Math.max(-maxY, baseY + dy));
+        window.svgPanState[idx] = { x: newX, y: newY };
+        _applySvgTransform(idx);
+      }
+    }
+    function onUp() {
+      area.classList.remove('dragging');
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    e.preventDefault();
+  });
+})();
+window.downloadSvg = function(idx) {
+  const container = document.getElementById('svg-container-' + idx);
+  if (!container) return;
+  const svgEl = container.querySelector('svg');
+  if (!svgEl) return;
+  // 序列化 SVG
+  const serializer = new XMLSerializer();
+  let svgStr = serializer.serializeToString(svgEl);
+  // 添加 XML 声明
+  svgStr = '<?xml version="1.0" encoding="UTF-8"?>' + svgStr;
+  // 创建下载链接
+  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'diagram-' + (idx + 1) + '.svg';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+</script>
+
+<!-- Page Footer -->
+<footer class="page-footer">
+  <span class="page-footer-text">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block;vertical-align:-2px;margin-right:4px;opacity:0.7"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>chouray 开源
+  </span>
+</footer>
+</body>
+</html>

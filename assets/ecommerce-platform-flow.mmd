@@ -1,0 +1,122 @@
+# @title 电商平台整合流程图
+# @roles critical:order,pay success:login,home danger:refund,dispute info:analytics tb_search
+
+flowchart TB
+    subgraph APP["共用 App 核心"]
+        direction TB
+        login["用户登录<br/>统一账号体系"]
+        home["首页聚合<br/>多平台入口"]
+        order["订单中心<br/>全平台订单管理"]
+        pay["支付中心<br/>统一收银台"]
+        msg["消息中心<br/>全平台通知"]
+    end
+
+    subgraph TAOBAO["淘宝/天猫平台"]
+        direction TB
+        tb_search["商品搜索<br/>比价功能"]
+        tb_cart["购物车同步"]
+        tb_coupon["优惠券互通"]
+        tb_review["评价共享"]
+    end
+
+    subgraph JD["京东平台"]
+        direction TB
+        jd_search["商品搜索<br/>京东直营"]
+        jd_cart["购物车同步"]
+        jd_coupon["京豆抵扣"]
+        jd_review["评价共享"]
+    end
+
+    subgraph PDD["拼多多平台"]
+        direction TB
+        pdd_search["商品搜索<br/>团购模式"]
+        pdd_cart["购物车同步"]
+        pdd_coupon["拼单优惠"]
+        pdd_review["评价共享"]
+    end
+
+    subgraph THIRD["第三方服务整合"]
+        direction TB
+        subgraph PAY["支付服务"]
+            alipay["支付宝"]
+            wechat_pay["微信支付"]
+            union_pay["银联云闪付"]
+        end
+
+        subgraph LOGISTICS["物流服务"]
+            sf["顺丰速运"]
+            ems["邮政EMS"]
+            jd_logistics["京东物流"]
+        end
+
+        subgraph SERVICE["客服与售后"]
+            ai_service["AI智能客服"]
+            refund["极速退款"]
+            dispute["纠纷仲裁"]
+        end
+    end
+
+    subgraph DATA["数据与分析"]
+        analytics["用户行为分析"]
+        recom["智能推荐"]
+        dashboard["运营看板"]
+    end
+
+    %% 用户入口
+    user(("用户"))
+
+    %% 用户到App
+    user --> login
+    user --> home
+
+    %% App到各平台
+    home --> tb_search
+    home --> jd_search
+    home --> pdd_search
+
+    %% 淘宝流程
+    tb_search --> tb_cart
+    tb_cart --> tb_coupon
+    tb_coupon --> order
+    tb_review --> order
+
+    %% 京东流程
+    jd_search --> jd_cart
+    jd_cart --> jd_coupon
+    jd_coupon --> order
+    jd_review --> order
+
+    %% 拼多多流程
+    pdd_search --> pdd_cart
+    pdd_cart --> pdd_coupon
+    pdd_coupon --> order
+    pdd_review --> order
+
+    %% 订单到支付
+    order --> pay
+
+    %% 支付到第三方
+    pay --> alipay
+    pay --> wechat_pay
+    pay --> union_pay
+
+    %% 物流
+    pay --> sf
+    pay --> ems
+    pay --> jd_logistics
+
+    %% 客服
+    order --> ai_service
+    order --> refund
+    refund --> dispute
+
+    %% 数据流
+    user --> analytics
+    order --> analytics
+    analytics --> recom
+    analytics --> dashboard
+
+    %% 消息通知
+    order --> msg
+    pay --> msg
+    msg --> user

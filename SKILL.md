@@ -202,8 +202,17 @@ preview_url("file://" + SKILL_DIR + "/assets/preview.html" + themeParam)
 
 **Step 4 — 执行渲染，传递 Step 2 记录的主题**
 - 使用 Step 2 记录的主题和预设执行渲染，**必须带 `--theme` 和 `--preset` 参数**
-- 单图表：`node scripts/render.js <file.mmd> -t <主题> -p <预设> -o output.svg`
-- 多图表聚合：`node scripts/rich-html.js "标题" --diagrams *.mmd --theme <主题> --preset <预设> --output result.html`
+- 输出 **SVG/PNG/ASCII**：用 `node scripts/render.js`
+- 输出 **HTML**（无论单张还是多张图表）：**必须用** `node scripts/rich-html.js`
+
+```bash
+# SVG / PNG / ASCII
+node scripts/render.js <file.mmd> -t <主题> -p <预设> -o output.svg
+
+# HTML（必须用 rich-html.js，不可用 render.js -f html 替代）
+node scripts/rich-html.js "<标题>" --diagrams <file.mmd> --theme <主题> --preset <预设> --output result.html
+```
+
 - 用 `preview_url` 打开生成的 HTML 结果（`file://` + 绝对路径）
 
 ### 意图不确定时的确认机制（强制）
@@ -905,8 +914,8 @@ node scripts/rich-html.js "报告标题" \
 
 ### 触发场景
 
+- 用户要求将图表输出为 **HTML 文件**（无论单张还是多张）
 - 用户说「生成一个报告」「做一份文档」「整合成页面」「汇总展示」
-- 用户有 2 张及以上图表需要一并展示
 - 用户要求类似「像参考文件那样的丰富展示」
 
 ### 生成命令（直接执行，无需用户确认）
@@ -964,6 +973,10 @@ preview_url("file:///绝对路径/result.html")
 ---
 
 ## ⚠️ AI 生成独立 HTML 文件的强制规范
+
+> ⛔ **本节是 rich-html.js 内部实现参考文档，AI 工作流中禁止使用。**
+> AI 必须调用 `scripts/rich-html.js` 生成 HTML，**不得绕过脚本手动拼接 HTML**。
+> 详见上方「多图表丰富展示 HTML 规范」章节（从第 911 行开始）。
 
 > 当用户要求将 Mermaid 图表输出为**独立 HTML 文件**时，AI **必须**严格按照本节模板生成，否则会出现样式串扰、SVG 裁剪、线条无颜色等问题。
 

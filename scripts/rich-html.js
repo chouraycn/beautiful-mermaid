@@ -2261,7 +2261,7 @@ function buildHtml(options, diagrams, colors, themeName, presetName) {
       position: relative;
       width: 100%;
       min-height: min(52vw, 480px);
-      overflow: visible;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -3357,7 +3357,7 @@ async function main() {
       let svg = renderMermaidSVG(renderCode, renderOptions);
       svg = injectStylesToSVG(svg, resolvedTheme, effectivePreset);
       // 应用语义角色 class（必须在 injectStylesToSVG 之后，CSS 规则才能命中）
-      svg = applySemanticRoles(svg, meta.roles);
+      svg = applySemanticRoles(svg, meta.roles, { warn: msg => console.warn(`⚠ ${msg}`) });
 
       // 移除 svg 的固定 width/height，让它能够响应式缩放
       svg = svg
